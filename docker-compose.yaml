@@ -1,0 +1,29 @@
+version: '3.6'
+services:
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: db
+      MYSQL_USER: db
+      MYSQL_PASSWORD: db
+    networks:
+      - mynetwork
+    ports:
+      - "3306:3306"
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: ddev-phpmyadmin
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+    ports:
+      - "9090:80"
+    networks:
+      - mynetwork
+    restart: always
+
+networks:
+  mynetwork:
+    driver: bridge
