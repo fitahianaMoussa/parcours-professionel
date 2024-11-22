@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Check,
     FileText,
@@ -59,15 +59,116 @@ const MultiStepForm = ({ auth, agents }) => {
         setData(name, type === 'checkbox' ? checked : value);
     };
 
+    const [selectedAgent, setSelectedAgent] = useState(null);
+    const [availableContractTypes, setAvailableContractTypes] = useState([]);
+
+    const getContractTypesByCategory = (agent) => {
+        console.log(agent)
+        if (!agent?.categorie?.niveau) return [];
+        
+        const baseTypes = [];
+        const category = agent.categorie.niveau.trim();
+        const isCategory3 = category === "Category III";
+        
+        baseTypes.push({
+            value: "premier_contrat",
+            label: "Premier contrat EFA (24 mois)",
+            description: isCategory3 
+                ? "Contrat initial de 24 mois" 
+                : "Contrat initial - 1ère année: Stagiaire"
+        });
+    
+        baseTypes.push({
+            value: "deuxieme_contrat",
+            label: "Deuxième contrat EFA (24 mois)",
+            description: isCategory3 
+                ? "Renouvellement automatique après le premier contrat"
+                : "Renouvellement avec passage au grade 2ème classe, 2ème échelon"
+        });
+    
+        baseTypes.push({
+            value: "troisieme_contrat",
+            label: "Troisième contrat EFA (24 mois)",
+            description: isCategory3 
+                ? "Dernier contrat avant passage au statut stagiaire"
+                : "Dernier contrat maintenant le grade 2ème classe, 2ème échelon"
+        });
+    
+        if (isCategory3) {
+            baseTypes.push({
+                value: "integration_stage",
+                label: "Intégration - Stage (1 an)",
+                description: "Période de stage après la phase contractuelle"
+            });
+            baseTypes.push({
+                value: "titularisation",
+                label: "Titularisation",
+                description: "Intégration au grade de 2ème classe, 1er échelon"
+            });
+        } else {
+            baseTypes.push({
+                value: "avenant_premiere_annee",
+                label: "Avenant première année",
+                description: "Passage au grade 2ème classe, 1er échelon"
+            });
+            baseTypes.push({
+                value: "avenant_deuxieme_contrat",
+                label: "Avenant deuxième contrat",
+                description: "Passage au grade 2ème classe, 2ème échelon"
+            });
+            baseTypes.push({
+                value: "avenant_troisieme_contrat",
+                label: "Avenant troisième contrat",
+                description: "Maintien au grade 2ème classe, 2ème échelon"
+            });
+            baseTypes.push({
+                value: "integration_direct",
+                label: "Intégration directe",
+                description: "Passage direct au grade 2ème classe, 3ème échelon"
+            });
+        }
+    
+        return baseTypes;
+    };
+    
     const handleAgentSelect = (agent) => {
+        setSelectedAgent(agent);
         setData(prev => ({
             ...prev,
             agent_id: agent.id,
             agent_name: `${agent.nom} ${agent.prenom}`,
+            type: ""
         }));
+        
+        const contractTypes = getContractTypesByCategory(agent);
+        setAvailableContractTypes(contractTypes);
         setSearchTerm("");
         setFilteredAgents(agents);
     };
+    
+
+        
+
+    useEffect(() => {
+        if (data.type && data.type.includes("contrat")) {
+            // Set 24-month period for contracts
+            if (data.date_debut) {
+                const startDate = new Date(data.date_debut);
+                const endDate = new Date(startDate);
+                endDate.setMonth(startDate.getMonth() + 24);
+                setData("date_fin", endDate.toISOString().split('T')[0]);
+            }
+        } else if (data.type === "integration_stage") {
+            // Set 1-year period for stage
+            if (data.date_debut) {
+                const startDate = new Date(data.date_debut);
+                const endDate = new Date(startDate);
+                endDate.setFullYear(startDate.getFullYear() + 1);
+                setData("date_fin", endDate.toISOString().split('T')[0]);
+            }
+        }
+    }, [data.type, data.date_debut]);
+
 
     const handleSearch = debounce((term) => {
         setSearchTerm(term);
@@ -237,25 +338,41 @@ const MultiStepForm = ({ auth, agents }) => {
 
                             {/* Contract Type */}
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Type de Contrat
-                                </label>
-                                <select
-                                    name="type"
-                                    value={data.type}
-                                    onChange={handleInputChange}
-                                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">Sélectionner un type</option>
-                                    <option value="integration">Intégration</option>
-                                    <option value="reclassement">Reclassement</option>
-                                    <option value="titularisation">Titularisation</option>
-                                    <option value="avenant signé">Avenant signé</option>
-                                </select>
-                                {errors.type && (
-                                    <div className="mt-1 text-sm text-red-500">{errors.type}</div>
-                                )}
-                            </div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Type de Contrat
+                            </label>
+                            <select
+                                name="type"
+                                value={data.type}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                disabled={!selectedAgent}
+                            >
+                                {availableContractTypes.map((type) => (
+                                    <option key={type.value} value={type.value}>
+                                        {type.label}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {!selectedAgent && (
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Veuillez d'abord sélectionner un agent
+                                </p>
+                            )}
+
+                            {selectedAgent && data.type && (
+                                <p className="p-2 mt-2 text-sm text-gray-600 rounded-md bg-gray-50">
+                                    {availableContractTypes.find(t => t.value === data.type)?.description}
+                                </p>
+                            )}
+
+                            {errors.type && (
+                                <div className="mt-1 text-sm text-red-500">{errors.type}</div>
+                            )}
+                        </div>
+
+
 
                             {/* Contract Number */}
                             <div className="space-y-2">

@@ -16,19 +16,24 @@ class EmployeeRetirementController extends Controller
     {
         $this->retirementService = $retirementService;
     }
-
+    
     public function index()
     {
-        $employees = Agent::query()
-            ->where('status', '!=', 'retraite')
-            ->where(fn($query) => $query->isApproachingRetirement())
-            ->paginate(10);
+        $agents = Agent::query()
+            ->where('status', 'retraite') // Liste des agents déjà en retraite
+            ->orWhere(function ($query) {
+                // Agents proches de la retraite
+                $retirementAge = 60;
+                $query->where('status', '!=', 'retraite')
+                      ->whereRaw('TIMESTAMPDIFF(YEAR, date_de_naissance, CURDATE()) >= ?', [$retirementAge - 5]);
+            })
+            ->orderBy('date_de_naissance')
+            ->get();
 
         return Inertia::render('Retirement/Index', [
-            'employees' => $employees
+            'agents' => $agents,
         ]);
     }
-
     public function processRetirement(Request $request, Agent $employee)
     {
         $validated = $request->validate([

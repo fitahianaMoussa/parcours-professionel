@@ -28,8 +28,21 @@ class ContratController extends Controller
      */
     public function create()
     {
-        $agents = Agent::all();
-        return Inertia::render('Contrats/CreateContrat',['agents' => $agents]);
+        $agents = Agent::with('categorie')->get()->map(function ($agent) {
+            return [
+                'id' => $agent->id,
+                'nom' => $agent->nom,
+                'prenom' => $agent->prenom,
+                'categorie' => [
+                    'id' => $agent->categorie->id,
+                    'niveau' => $agent->categorie->nom,
+                ]
+            ];
+        });
+    
+        return Inertia::render('Contrats/CreateContrat', [
+            'agents' => $agents
+        ]);
     }
 
     /**

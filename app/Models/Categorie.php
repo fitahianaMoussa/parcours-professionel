@@ -13,4 +13,15 @@ class Categorie extends Model
     {
         return $this->hasMany(Agent::class);
     }
+
+
+    public function reclassementsAncien()
+    {
+        return $this->hasMany(Reclassement::class, 'ancienne_categorie_id');
+    }
+
+    public function reclassementsNouveau()
+    {
+        return $this->hasMany(Reclassement::class, 'nouvelle_categorie_id');
+    }
 }

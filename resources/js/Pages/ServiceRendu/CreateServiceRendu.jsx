@@ -32,7 +32,7 @@ const MultiStepForm = ({ agents ,auth}) => {
         <AuthenticatedLayout user={auth.user}>
         <div className="max-w-5xl p-6 mx-auto bg-white rounded-lg shadow-lg">
             <h2 className="mb-4 text-2xl font-semibold text-center">
-                Service Rendu et Référence
+                Service Rendu 
             </h2>
 
             <form onSubmit={handleSubmit}>
@@ -175,7 +175,7 @@ const MultiStepForm = ({ agents ,auth}) => {
                 {step === 2 && (
                     <div>
                         <h3 className="mb-4 text-lg font-medium">
-                            Référence Réglementaire
+                            Acte de nomination
                         </h3>
                         <div className="mb-4">
                             <label className="block text-gray-700">

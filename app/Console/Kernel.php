@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\ProcessCareerProgressionCommand;
+use App\Jobs\DetectAndNotifyRetirementJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -25,6 +26,7 @@ class Kernel extends ConsoleKernel
        // $schedule->command('avancement:process')->daily();
         // Exécution quotidienne d'une commande, par exemple
         $schedule->command('career:process')->daily();
+        $schedule->job(new DetectAndNotifyRetirementJob())->everyMinute();
     }
 
     /**

@@ -12,7 +12,7 @@ import {
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 
-const AgentForm = ({ auth, errors }) => {
+const AgentForm = ({ auth, errors, categories }) => {
     const { data, setData, post, processing } = useForm({
         matricule: "",
         nom: "",
@@ -24,7 +24,6 @@ const AgentForm = ({ auth, errors }) => {
         diplome: "",
         corps: "",
         chapitre_budgetaire: "",
-        indice: "",
         is_active: true,
     });
 
@@ -161,20 +160,25 @@ const AgentForm = ({ auth, errors }) => {
                             >
                                 Catégorie
                             </label>
-                            <select
-                                id="categorie_id"
-                                name="categorie_id"
-                                value={data.categorie_id}
-                                onChange={(e) => setData('categorie_id', e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                <option value="">
-                                    Sélectionner une catégorie
-                                </option>
-                                <option value="1">Catégorie 1</option>
-                                <option value="2">Catégorie 2</option>
-                                <option value="3">Catégorie 3</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    id="categorie_id"
+                                    name="categorie_id"
+                                    value={data.categorie_id}
+                                    onChange={(e) => setData('categorie_id', e.target.value)}
+                                    className={`w-full px-4 py-2 pl-10 border ${
+                                        errors.categorie_id ? 'border-red-500' : 'border-gray-300'
+                                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                                >
+                                    <option value="">Sélectionner une catégorie</option>
+                                    {categories.map((category) => (
+                                        <option key={category.id} value={category.id}>
+                                            {category.nom}
+                                        </option>
+                                    ))}
+                                </select>
+                                <GraduationCap className="absolute w-4 h-4 text-gray-400 left-3 top-3" />
+                            </div>
                             {errors.categorie_id && (
                                 <p className="mt-1 text-xs text-red-500">{errors.categorie_id}</p>
                             )}
@@ -226,8 +230,8 @@ const AgentForm = ({ auth, errors }) => {
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="">Sélectionner le type</option>
-                                <option value="diplome">Diplôme</option>
-                                <option value="budgetaire">Budgétaire</option>
+                                <option value="Diplôme">Diplôme</option>
+                                <option value="Poste budgétaire libre">Poste budgétaire libre</option>
                             </select>
                             {errors.type_recrutement && (
                                 <p className="mt-1 text-xs text-red-500">{errors.type_recrutement}</p>
@@ -239,7 +243,7 @@ const AgentForm = ({ auth, errors }) => {
                                 htmlFor="diplome"
                                 className="block text-sm font-medium text-gray-700"
                             >
-                                Diplôme
+                                Diplôme maximum
                             </label>
                             <div className="relative">
                                 <input
@@ -312,30 +316,6 @@ const AgentForm = ({ auth, errors }) => {
 
                    {/* Indice et Statut */}
                 <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                        <label
-                            htmlFor="indice"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Indice
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                id="indice"
-                                name="indice"
-                                value={data.indice}
-                                onChange={(e) => setData('indice', e.target.value)}
-                                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Indice"
-                            />
-                            <Hash className="absolute w-4 h-4 text-gray-400 left-3 top-3" />
-                        </div>
-                        {errors.indice && (
-                            <p className="mt-1 text-xs text-red-500">{errors.indice}</p>
-                        )}
-                    </div>
-
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-gray-700">
                             Statut actif

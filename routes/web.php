@@ -6,9 +6,12 @@ use App\Http\Controllers\AvancementController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CareerManagementController;
 use App\Http\Controllers\ContratController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardStatsController;
 use App\Http\Controllers\EmployeeRetirementController;
 use App\Http\Controllers\IntegrationPhaseController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReclassementController;
 use App\Http\Controllers\ServiceRenduController;
 use App\Models\Avancement;
 use App\Models\ServiceRendu;
@@ -36,9 +39,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -100,6 +101,13 @@ Route::middleware('auth')->group(function () {
 
     // Search archived retirees
     Route::get('/archives', [EmployeeRetirementController::class, 'archiveSearch'])->name('archives.index');
+    Route::prefix('reclassements')->group(function () {
+        Route::get('/agents-eligibles', [ReclassementController::class, 'agentsEligibles']);
+        Route::post('/reclasser/{agent}', [ReclassementController::class, 'reclasser']);
+        Route::get('/historiques', [ReclassementController::class, 'historiquesReclassements'])
+    ->name('reclassements.historiques');
+    });
+   
 });
 
 require __DIR__ . '/auth.php';

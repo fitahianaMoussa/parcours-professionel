@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreAgentRequest;
 use App\Http\Requests\UpdateAgentRequest;
 use App\Models\Agent;
+use App\Models\Categorie;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -25,7 +26,8 @@ class AgentController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Agent/AgentCreate');
+        $categories = Categorie::all();
+        return Inertia::render('Agent/AgentCreate',['categories' => $categories]);
     }
 
     /**
@@ -66,7 +68,7 @@ class AgentController extends Controller
             ],
             'type_recrutement' => [
                 'nullable', 
-                'in:diplome,budgetaire'
+                'in:Diplôme,Poste budgétaire libre'
             ],
             'diplome' => [
                 'nullable', 
@@ -83,11 +85,6 @@ class AgentController extends Controller
                 'string', 
                 'max:100'
             ],
-            'indice' => [
-                'nullable', 
-                'string', 
-                'max:50'
-            ],
             'is_active' => [
                 'boolean'
             ]
@@ -96,7 +93,7 @@ class AgentController extends Controller
             'date_entree.after' => 'La date d\'entrée doit être postérieure à la date de naissance.',
             'date_de_naissance.before' => 'La date de naissance doit être une date passée.'
         ]);
-    
+       // dd($validatedData);
         try {
             $agent = Agent::create($validatedData);
     
@@ -105,7 +102,7 @@ class AgentController extends Controller
                 ->with('success', 'Agent créé avec succès');
         } catch (\Exception $e) {
             return back()
-                ->withErrors(['error' => 'Une erreur s\'est produite lors de la création de l\'agent'])
+                ->withErrors(['error' => 'Une erreur s\'est produite lors de la création de l\'agent' .$e])
                 ->withInput();
         }
     }

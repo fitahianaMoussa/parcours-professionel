@@ -10,6 +10,30 @@ class Agent extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'matricule',
+        'nom',
+        'prenom',
+        'date_de_naissance',
+        'date_entree',
+        'categorie_id',
+        'type_recrutement',
+        'diplome',
+        'corps',
+        'chapitre_budgetaire',
+        'is_active',
+        'status',
+        'retirement_date',
+        'contrat_renouvelable', // Ajouté pour éviter l'erreur
+    ];
+
+    protected $dates = [
+        'date_entree',
+        'date_de_naissance',
+        'retirement_date',
+    ];
+
+    // Relations
     public function avancements()
     {
         return $this->hasMany(Avancement::class);
@@ -25,37 +49,46 @@ class Agent extends Model
         return $this->belongsTo(Categorie::class);
     }
 
-    protected $dates = [
-        'date_entree', 
-        'date_de_naissance', 
-        'retirement_date'
-    ];
-
-    public function isApproachingRetirement()
+    public function reclassements()
     {
-        $retirementAge = 60; // Standard retirement age
-        return Carbon::now()->diffInYears($this->date_de_naissance) >= $retirementAge;
+        return $this->hasMany(Reclassement::class);
     }
 
-    public function scopeRetirees($query)
+   // Scope : Agents approchant la retraite (par défaut 5 ans avant l'âge de la retraite)
+   public function scopeApproachingRetirement($query, $yearsUntilRetirement = 5)
+   {
+       $retirementAge = 60; // Âge de retraite standard
+       $thresholdDate = now()->subYears($retirementAge - $yearsUntilRetirement);
+
+       return $query->where('date_de_naissance', '<=', $thresholdDate);
+   }
+
+   // Vérifie si l'agent approche la retraite (méthode d'instance)
+   public function isApproachingRetirement($yearsUntilRetirement = 0)
+   {
+       $retirementAge = 60; // Âge de retraite standard
+       $age = Carbon::now()->diffInYears($this->date_de_naissance);
+
+       return $age >= ($retirementAge - $yearsUntilRetirement);
+   }
+    // Vérifie si un agent est en phase d'intégration
+    public function estDansPhaseIntegration()
     {
-        return $query->where('status', 'retraite');
+        return $this->date_entree->diffInYears(now()) < 6;
     }
 
+    // Vérifie si un agent peut être reclassé
+    public function peutEtreReclasse()
+    {
+        return $this->estDansPhaseIntegration() && $this->contrat_renouvelable;
+    }
+
+    // Met à jour l'agent comme étant en retraite
     public function initiateRetirement()
     {
-        $this->retirement_date = now();
-        $this->status = 'retraite';
-        $this->save();
+        $this->update([
+            'retirement_date' => now(),
+            'status' => 'retraite',
+        ]);
     }
-
-      // Define the custom scope for approaching retirement
-      public function scopeIsApproachingRetirement($query)
-      {
-          // Example: Assuming employees who are 5 years away from retirement (60 years old)
-          $retirementAge = 60; // You can adjust this to fit your specific needs
-          $currentYear = now()->year;
-  
-          return $query->whereYear('date_entree', '<', $currentYear - ($retirementAge - 5));
-      }
 }
