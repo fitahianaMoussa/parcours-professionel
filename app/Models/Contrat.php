@@ -28,4 +28,10 @@ public function Agent()
 {
     return $this->belongsTo(Agent::class);
 }
+
+    public function avenants()
+    {
+        return $this->hasMany(Avancement::class);
+    }
+
 }

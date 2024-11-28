@@ -15,11 +15,11 @@ class CategorieSeeder extends Seeder
     {
        
             Categorie::create([
-                'nom' => 'categorie 3',
+                'nom' => 'Categorie III',
             ]);
     
             Categorie::create([
-                'nom' => 'categorie 4',
+                'nom' => 'Categorie IV',
             ]);
         
     }

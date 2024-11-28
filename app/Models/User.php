@@ -42,4 +42,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+
+      // A user can have one agent
+      public function agent()
+      {
+          return $this->hasOne(Agent::class);
+      }
 }

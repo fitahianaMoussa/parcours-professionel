@@ -1,18 +1,23 @@
 <?php
 
+use App\Events\TestNotificationEvent;
 use App\Http\Controllers\AdvancementController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AvancementController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CareerManagementController;
+use App\Http\Controllers\CareerProcessorController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ContratController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardStatsController;
+use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\EmployeeRetirementController;
 use App\Http\Controllers\IntegrationPhaseController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReclassementController;
 use App\Http\Controllers\ServiceRenduController;
+use App\Http\Controllers\TestController;
 use App\Models\Avancement;
 use App\Models\ServiceRendu;
 use Illuminate\Foundation\Application;
@@ -41,7 +46,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth','role:RH'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -49,6 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('agent')->group(function () {
         Route::get('/create', [AgentController::class, 'create'])->name('agent.create');
         Route::get('/', [AgentController::class, 'index'])->name('agent.index');
+        Route::get('/{agent}', [AgentController::class, 'show'])->name('agent.show');
         Route::post('/', [AgentController::class, 'store'])->name('agent.store');
     });
 
@@ -107,7 +113,48 @@ Route::middleware('auth')->group(function () {
         Route::get('/historiques', [ReclassementController::class, 'historiquesReclassements'])
     ->name('reclassements.historiques');
     });
-   
-});
 
+    Route::get('/test-pusher', function () {
+        broadcast(new TestNotificationEvent('Pusher fonctionne correctement !'));
+        return response()->json(['message' => 'L\'événement a été diffusé.']);
+    });
+
+    
+// Route pour afficher la page principale de gestion de carrière
+Route::get('/careerProcessor/{agentId}', [CareerProcessorController::class, 'index'])
+    ->name('career.index');
+
+// Route pour traiter les données de carrière de l'agent
+Route::post('/career/{agentId}/process', [CareerProcessorController::class, 'processCareer'])
+    ->name('career.process');
+
+// Route pour récupérer le résumé de carrière (API ou besoin spécifique)
+Route::get('/career/{agentId}/summary', [CareerProcessorController::class, 'getCareerSummary'])
+    ->name('career.summary');
+
+// Route pour récupérer les avancements formatés de l'agent
+Route::get('/career/{agentId}/advancements', [CareerProcessorController::class, 'getFormattedAdvancements'])
+    ->name('career.advancements');
+
+// Route pour récupérer les contrats formatés de l'agent
+Route::get('/career/{agentId}/contracts', [CareerProcessorController::class, 'getFormattedContracts'])
+    ->name('career.contracts');
+
+    Route::get('/contracts/{agentId}', [ContractController::class, 'index'])->name('contracts.index');
+    Route::post('/contracts/{agentId}/create-initial', [ContractController::class, 'createInitialContracts'])->name('contracts.create-initial');
+    Route::post('/contracts/renew/{contractId}', [ContractController::class, 'renewContract'])->name('contracts.renew');
+    Route::post('/agents/{agentId}/advance', [ContractController::class, 'advanceAgent'])->name('agents.advance');
+    Route::post('/agents/{agentId}/transition-post-integration', [ContractController::class, 'transitionPostIntegration'])->name('agents.transition-post-integration');
+    Route::post('/agents/{agentId}/update-index', [ContractController::class, 'updateSalaryIndex'])->name('agents.update-index');
+    Route::post('/agents/{agentId}/reclassify', [ContractController::class, 'reclassifyAgent'])->name('agents.reclassify');
+    Route::get('/agents/{agentId}/check-advancement-eligibility', [ContractController::class, 'checkAdvancementEligibility'])->name('agents.check-advancement-eligibility');
+    Route::get('/agents/{agentId}/remaining-duration', [ContractController::class, 'getRemainingDuration'])->name('agents.remaining-duration');
+    Route::get('/test-career-path/{agentId}', [ContractController::class, 'testCareerPath'])->name('parcours.test');
+});
+Route::middleware(['auth','role:agent'])->group(function () {
+    Route::get('/parcours',[EmployeController::class,'EmployeParcours'])->name('employe.parcours');
+    Route::get('/employecontrats',[EmployeController::class,'Contrats'])->name('employe.contrats');
+    Route::get('/employeavancements',[EmployeController::class,'Avancements'])->name('employe.avancements');
+    Route::get('/employeavancements/{avancement}', [EmployeController::class, 'showAvancement']) ->name('advancementsEmploye.show');
+});
 require __DIR__ . '/auth.php';

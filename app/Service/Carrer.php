@@ -15,7 +15,7 @@ class Carrer
     protected $stageDuration = 12; // 1 an en mois
     
     public $careerPaths = [
-        'CATEGORY_III' => [
+        'Categorie III' => [
             'INTEGRATION' => [
                 'phases' => [
                     [
@@ -110,7 +110,7 @@ class Carrer
                 ]
             ]
         ],
-        'CATEGORY_IV_PLUS' => [
+        'Categorie IV' => [
             'INTEGRATION' => [
                 'phases' => [
                     [
@@ -281,8 +281,12 @@ class Carrer
     ];
 
     public function calculateNextProgression($agent)
-    {
+    { if (!($agent instanceof Agent)) {
+        throw new \InvalidArgumentException('Expected an instance of Agent.');
+    }
         $currentContract = $agent->contrats()->latest()->first();
+      
+      
         $latestAvancement = $agent->avancements()->latest()->first();
 
         if (!$currentContract) {
@@ -450,7 +454,7 @@ class Carrer
     
     protected function determineNextGradeAndEchelon($currentGrade, $currentEchelon)
     {
-        $grades = $this->careerPaths['CATEGORY_III']['TITULARISATION']['progression'];
+        $grades = $this->careerPaths['Categorie III']['TITULARISATION']['progression'];
     
         foreach ($grades as $gradeName => $echelons) {
             foreach ($echelons as $index => $echelon) {

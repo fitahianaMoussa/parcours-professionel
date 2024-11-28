@@ -137,9 +137,9 @@ export default function Dashboard({ auth }) {
         >
             <Head title="Dashboard" />
 
-            <div className="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-lg">
+            <div className="max-w-6xl p-6 mx-auto bg-white rounded-lg shadow-lg">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <h2 className="flex items-center gap-2 mb-4 text-2xl font-bold text-gray-800">
           <UserCheck className="text-blue-600" />
           Gestion des Agents
         </h2>
@@ -147,11 +147,11 @@ export default function Dashboard({ auth }) {
         {/* Filtres et Recherche */}
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" size={20} />
             <input
               type="text"
               placeholder="Rechercher un agent..."
-              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -225,7 +225,7 @@ export default function Dashboard({ auth }) {
               {paginatedAgents.map((agent) => (
                 <tr 
                   key={agent.id}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="transition-colors hover:bg-gray-50"
                 >
                   <td className="px-6 py-4">
                     <div>
@@ -267,7 +267,7 @@ export default function Dashboard({ auth }) {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center justify-between mt-4">
           <div className="text-sm text-gray-500">
             Affichage de {startIndex + 1} à {Math.min(startIndex + itemsPerPage, sortedAgents.length)} sur {sortedAgents.length} agents
           </div>
@@ -275,17 +275,17 @@ export default function Dashboard({ auth }) {
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft size={20} />
             </button>
-            <span className="px-4 py-2 rounded-lg bg-blue-50 text-blue-600 font-medium">
+            <span className="px-4 py-2 font-medium text-blue-600 rounded-lg bg-blue-50">
               {currentPage}
             </span>
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight size={20} />
             </button>

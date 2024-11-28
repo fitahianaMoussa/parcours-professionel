@@ -184,15 +184,15 @@ const CareerManagementShow = () => {
               <div className="space-y-3">
                 <div className="flex items-center space-x-2 text-gray-700">
                   <GraduationCap className="w-4 h-4 text-gray-400" />
-                  <p>Grade actuel: {agent.avancements[0]?.grade?.nom || 'N/A'}</p>
+                  <p>Grade actuel: {agent.avancements?.grade?.nom || 'N/A'}</p>
                 </div>
                 <div className="flex items-center space-x-2 text-gray-700">
                   <Award className="w-4 h-4 text-gray-400" />
-                  <p>Échelon: {agent.avancements[0]?.echelon || 'N/A'}</p>
+                  <p>Échelon: {agent.avancements?.echelon || 'N/A'}</p>
                 </div>
                 <div className="flex items-center space-x-2 text-gray-700">
                   <ScrollText className="w-4 h-4 text-gray-400" />
-                  <p>Indice: {agent.avancements[0]?.index_value || 'N/A'}</p>
+                  <p>Indice: {agent.avancements?.index_value || 'N/A'}</p>
                 </div>
               </div>
             </div>

@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import { CircleUser, Clock, Award, ChevronRight, FileText } from "lucide-react";
 import CareerProgressionManager from "./Progression";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
-const formatCategory = (category) => {
-    return category.replace(/\s+/g, "_").toUpperCase();
-};
+// const formatCategory = (category) => {
+//     return category.replace(/\s+/g, "_").toUpperCase();
+// };
 const CareerDashboard = ({ agent, progression, careerPaths, auth }) => {
-    console.log(agent.categorie?.nom);
+    console.log(careerPaths);
     // const [selectedCategory, setSelectedCategory] = useState(agent.categorie?.nom?.toUpperCase() || 'CATEGORY_III');
-    const agentCategory = agent.categorie?.nom || "CATEGORY_III";
+    const agentCategory = agent.categorie?.nom || "Categorie III";
     const [selectedCategory, setSelectedCategory] = useState(
-        formatCategory(agentCategory)
+        agentCategory
     );
     const gradeLabels = {
         "2eme_classe": "2ème Classe",
@@ -165,10 +165,14 @@ const NextProgressionCard = ({ progression }) => (
 );
 
 const CareerPathTab = ({ careerPath, progression, gradeLabels }) => {
-    const phases = Object.entries(careerPath).map(([key, value]) => ({
+    const phases = careerPath ? Object.entries(careerPath).map(([key, value]) => ({
         type: key,
         ...value,
-    }));
+    })) : [];
+
+    // Render your component here
+
+
 
     return (
         <div className="bg-white border border-gray-200 rounded-lg shadow">
@@ -306,10 +310,7 @@ const AdvancementTab = ({ agent, progression }) => (
                                 : "Avancement"}{" "}
                             - Phase {avancement.contract_phase}
                         </h4>
-                        <p className="text-sm text-gray-500">
-                             Index{" "}
-                            {avancement.index_value}
-                        </p>
+                      
                         <p className="text-sm text-gray-500">
                             {new Date(
                                 avancement.date_debut
@@ -334,7 +335,7 @@ const DocumentsTab = ({ agent }) => (
             <p className="text-sm text-gray-500">Documents administratifs</p>
         </div>
         <div className="p-4 space-y-4">
-            {agent.arretes?.map((arrete, index) => (
+            {agent.avancements.arrete?.map((arrete, index) => (
                 <div
                     key={index}
                     className="flex items-center justify-between p-4 border rounded-lg"

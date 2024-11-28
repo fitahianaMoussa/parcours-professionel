@@ -32,11 +32,11 @@ class CareerController extends Controller
     {
         $nextProgression = $this->careerProgressionService->calculateNextProgression($agent);
         $careerPaths = $this->careerProgressionService->careerPaths;
-        
+       // dd($careerPaths);
         return Inertia::render('CareerManagement/Career', [
             'agent' => $agent->load(['contrats', 'avancements','categorie']),
             'progression' => $nextProgression,
-           'careerPaths' => $careerPaths
+            'careerPaths' => $careerPaths
         ]);
     }
 }

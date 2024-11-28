@@ -20,3 +20,11 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 Broadcast::channel('retirement-notifications', function ($user) {
     return $user->hasRole('admin') || $user->hasRole('hr');
 });
+
+Broadcast::channel('user.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});
+
+Broadcast::channel('test-channel', function ($user) {
+    return true; // autorise tous les utilisateurs
+});

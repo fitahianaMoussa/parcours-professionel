@@ -12,9 +12,10 @@
         Calendar,
         Building2,
         FileText,
-        CheckCircle2,
-        XCircle,
         PlusCircle,
+        Eye,
+        ClipboardList,
+        GitBranch,
     } from "lucide-react";
 
     export default function AgentIndex({ auth, agents }) {
@@ -155,15 +156,6 @@
                                         </th>
                                         <th className="px-6 py-3 text-left">
                                             <div className="flex items-center gap-2">
-                                                <GraduationCap
-                                                    size={16}
-                                                    className="text-blue-600"
-                                                />
-                                                <span>Diplôme</span>
-                                            </div>
-                                        </th>
-                                        <th className="px-6 py-3 text-left">
-                                            <div className="flex items-center gap-2">
                                                 <Calendar
                                                     size={16}
                                                     className="text-blue-600"
@@ -171,27 +163,8 @@
                                                 <span>Date d'entrée</span>
                                             </div>
                                         </th>
-                                        <th className="px-6 py-3 text-left">
-                                            <div className="flex items-center gap-2">
-                                                <Building2
-                                                    size={16}
-                                                    className="text-blue-600"
-                                                />
-                                                <span>Corps</span>
-                                            </div>
-                                        </th>
-                                        <th className="px-6 py-3 text-left">
-                                            <div className="flex items-center gap-2">
-                                                <FileText
-                                                    size={16}
-                                                    className="text-blue-600"
-                                                />
-                                                <span>Type</span>
-                                            </div>
-                                        </th>
-                                        <th className="px-6 py-3 text-left">
-                                            Categorie
-                                        </th>
+                                      
+                                    
                                         <th className="px-6 py-3 text-left">Actions</th>
                                     </tr>
                                 </thead>
@@ -212,50 +185,46 @@
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-gray-500">
-                                                {agent.diplome}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-500">
                                                 {new Date(
                                                     agent.date_entree
                                                 ).toLocaleDateString()}
                                             </td>
-                                            <td className="px-6 py-4 text-gray-500">
-                                                {agent.corps}
-                                            </td>
+                                          
+                                           
+                                           
                                             <td className="px-6 py-4">
-                                                <span
-                                                    className={`px-3 py-1 rounded-full text-sm ${
-                                                        agent.type_recrutement ===
-                                                        "diplome"
-                                                            ? "bg-blue-100 text-blue-800"
-                                                            : "bg-green-100 text-green-800"
-                                                    }`}
-                                                >
-                                                    {agent.type_recrutement ===
-                                                    "diplome"
-                                                        ? "Diplômé"
-                                                        : "Budgétaire"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {agent.categorie?.nom}
-                                            </td>
-                                            <td className="px-6 py-4 space-y-2">
-                                        <Link
-                                            href={route('career.dashboard', { agent: agent.id })}
-                                            className="flex items-center gap-2 px-3 py-1 text-sm text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50"
-                                        >
-                                            <ChevronRight size={16} />
-                                            Voir Parcours
-                                        </Link>
-                                        <Link
-                                            href={route('service.releve', { agent: agent.id })}
-                                            className="flex items-center gap-2 px-3 py-1 text-sm text-green-600 border border-green-600 rounded-lg hover:bg-green-50"
-                                        >
-                                            <FileText size={16} />
-                                            Relevé de Service
-                                        </Link>
-                                    </td>
+    <div className="flex items-center gap-2">
+        <Link
+            href={route('service.releve', { agent: agent.id })}
+            className="flex items-center gap-2 px-3 py-1 text-sm text-green-600 border border-green-600 rounded-lg hover:bg-green-50"
+        >
+            <FileText size={16} />
+            Relevé de Service
+        </Link>
+        <Link
+            href={route('agent.show', { agent: agent.id })}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-blue-600 transition-colors border border-blue-600 rounded-lg hover:bg-blue-50"
+        >
+            <Eye size={16} />
+            Voir détails
+        </Link>
+        <Link
+            href={route('career.dashboard', { agent: agent.id })}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-purple-600 transition-colors border border-purple-600 rounded-lg hover:bg-purple-50"
+        >
+            <GitBranch size={16} />
+            Parcours
+        </Link>
+        <Link
+            href={route('parcours.test', { agentId: agent.id })}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-green-600 transition-colors border border-green-600 rounded-lg hover:bg-green-50"
+        >
+            <ClipboardList size={16} />
+            Traiter parcours
+        </Link>
+    </div>
+</td>
+
                                         </tr>
                                     ))}
                                 </tbody>

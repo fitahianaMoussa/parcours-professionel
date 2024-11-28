@@ -6,6 +6,7 @@ use App\Http\Requests\StoreServiceRenduRequest;
 use App\Http\Requests\UpdateServiceRenduRequest;
 use App\Models\Agent;
 use App\Models\Avancement;
+use App\Models\Contrat;
 use App\Models\ReferencesReglementaire;
 use App\Models\ServiceRendu;
 use Illuminate\Http\Request;
@@ -106,10 +107,15 @@ class ServiceRenduController extends Controller
 
     public function releveService(Agent $agent)
     {
-        // Charger les avancements de l'agent donné
+       
+    $contrats = Contrat::with( 'arrete','agent')
+        ->where('agent_id', $agent->id)
+        ->get(); 
+
     $avancements = Avancement::with(['grade', 'arrete','agent'])
     ->where('agent_id', $agent->id)
     ->get();
+
     $services = ServiceRendu::with(['reference', 'agent'])
     ->where('agent_id', $agent->id)
     ->get();
@@ -117,7 +123,8 @@ class ServiceRenduController extends Controller
         return Inertia::render('ServiceRendu/Releve',[
             'avancements' => $avancements,
             'services' => $services,
-            'agent' => $agent
+            'agent' => $agent,
+            'contrats' => $contrats,
         ]);
     }
 }

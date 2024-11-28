@@ -14,7 +14,7 @@ import { Head, useForm } from "@inertiajs/react";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Utility function for debouncing
+
 const debounce = (func, wait) => {
     let timeout;
     return function executedFunction(...args) {
@@ -62,74 +62,165 @@ const MultiStepForm = ({ auth, agents }) => {
     const [selectedAgent, setSelectedAgent] = useState(null);
     const [availableContractTypes, setAvailableContractTypes] = useState([]);
 
-    const getContractTypesByCategory = (agent) => {
-        console.log(agent)
-        if (!agent?.categorie?.niveau) return [];
+   /**
+ * Get available contract types based on agent category
+ * @param {Object} agent - Agent information object
+ * @param {Object} agent.categorie - Category information
+ * @param {Object} agent.categorie.niveau - Category level (Category III or Category IV)
+ * @returns {Array} Array of available contract types
+ */
+const getContractTypesByCategory = (agent) => {
+    if (!agent?.categorie?.niveau) {
+        return [];
+    }
+    
+    const baseTypes = [];
+    const category = agent.categorie.niveau.trim();
+    const isCategory3 = category === "Category III";
+    const isCategory4 = category === "Category IV";
+    
+    // Handle Category III contracts
+    if (isCategory3) {
+        baseTypes.push({
+            value: "contrat_initial_cat3",
+            label: "Premier contrat d'intégration (24 mois)",
+            description: "Contrat initial de 24 mois sans grade spécifique",
+            duration: 24,
+            phase: "INTEGRATION",
+            sequence: 1
+        });
         
-        const baseTypes = [];
-        const category = agent.categorie.niveau.trim();
-        const isCategory3 = category === "Category III";
+        baseTypes.push({
+            value: "premier_renouvellement_cat3",
+            label: "Premier renouvellement (24 mois)",
+            description: "Premier renouvellement de 24 mois sans changement de grade",
+            duration: 24,
+            phase: "INTEGRATION",
+            sequence: 2
+        });
         
         baseTypes.push({
-            value: "premier_contrat",
-            label: "Premier contrat EFA (24 mois)",
-            description: isCategory3 
-                ? "Contrat initial de 24 mois" 
-                : "Contrat initial - 1ère année: Stagiaire"
+            value: "deuxieme_renouvellement_cat3",
+            label: "Deuxième renouvellement (24 mois)",
+            description: "Dernier renouvellement de 24 mois avant le stage",
+            duration: 24,
+            phase: "INTEGRATION",
+            sequence: 3
         });
-    
+        
+        // Stage Phase
         baseTypes.push({
-            value: "deuxieme_contrat",
-            label: "Deuxième contrat EFA (24 mois)",
-            description: isCategory3 
-                ? "Renouvellement automatique après le premier contrat"
-                : "Renouvellement avec passage au grade 2ème classe, 2ème échelon"
+            value: "stage_cat3",
+            label: "Stage (12 mois)",
+            description: "Période de stage avec grade 2ème classe, 1er échelon",
+            duration: 12,
+            phase: "STAGE",
+            grade: "2eme_classe",
+            echelon: 1
         });
-    
+        
+        // Titularisation
         baseTypes.push({
-            value: "troisieme_contrat",
-            label: "Troisième contrat EFA (24 mois)",
-            description: isCategory3 
-                ? "Dernier contrat avant passage au statut stagiaire"
-                : "Dernier contrat maintenant le grade 2ème classe, 2ème échelon"
+            value: "titularisation_cat3",
+            label: "Titularisation",
+            description: "Titularisation au grade 2ème classe, 1er échelon",
+            phase: "TITULARISATION",
+            grade: "2eme_classe",
+            echelon: 1
         });
+    }
     
-        if (isCategory3) {
-            baseTypes.push({
-                value: "integration_stage",
-                label: "Intégration - Stage (1 an)",
-                description: "Période de stage après la phase contractuelle"
-            });
-            baseTypes.push({
-                value: "titularisation",
-                label: "Titularisation",
-                description: "Intégration au grade de 2ème classe, 1er échelon"
-            });
-        } else {
-            baseTypes.push({
-                value: "avenant_premiere_annee",
-                label: "Avenant première année",
-                description: "Passage au grade 2ème classe, 1er échelon"
-            });
-            baseTypes.push({
-                value: "avenant_deuxieme_contrat",
-                label: "Avenant deuxième contrat",
-                description: "Passage au grade 2ème classe, 2ème échelon"
-            });
-            baseTypes.push({
-                value: "avenant_troisieme_contrat",
-                label: "Avenant troisième contrat",
-                description: "Maintien au grade 2ème classe, 2ème échelon"
-            });
-            baseTypes.push({
-                value: "integration_direct",
-                label: "Intégration directe",
-                description: "Passage direct au grade 2ème classe, 3ème échelon"
-            });
-        }
+    //Handle Category IV contracts
+    if (isCategory4) {
+        // First 24-month period
+        baseTypes.push({
+            value: "contrat_initial_cat4",
+            label: "Premier contrat d'intégration (24 mois)",
+            description: "Première année: Statut stagiaire, Deuxième année: 2ème classe, 1er échelon",
+            duration: 24,
+            phase: "INTEGRATION",
+            sequence: 1,
+            steps: [
+                {
+                    duration: 12,
+                    status: "stagiaire"
+                },
+                {
+                    duration: 12,
+                    grade: "2eme_classe",
+                    echelon: 1
+                }
+            ]
+        });
+        
+        // Second 24-month period
+        baseTypes.push({
+            value: "premier_renouvellement_cat4",
+            label: "Premier renouvellement (24 mois)",
+            description: "Maintien 2ème classe 1er échelon, puis passage 2ème classe 2ème échelon",
+            duration: 24,
+            phase: "INTEGRATION",
+            sequence: 2,
+            grade: "2eme_classe",
+            echelon: 1
+        });
+        
+        // Third 24-month period
+        baseTypes.push({
+            value: "deuxieme_renouvellement_cat4",
+            label: "Deuxième renouvellement (24 mois)",
+            description: "Maintien 2ème classe 2ème échelon",
+            duration: 24,
+            phase: "INTEGRATION",
+            sequence: 3,
+            grade: "2eme_classe",
+            echelon: 2
+        });
+        
+        // Avenants (Contract amendments)
+        baseTypes.push({
+            value: "avenant_premiere_annee_cat4",
+            label: "Avenant première année",
+            description: "Passage au grade 2ème classe, 1er échelon",
+            phase: "INTEGRATION",
+            type: "AVENANT",
+            grade: "2eme_classe",
+            echelon: 1
+        });
+        
+        baseTypes.push({
+            value: "avenant_deuxieme_periode_cat4",
+            label: "Avenant deuxième période",
+            description: "Passage au grade 2ème classe, 2ème échelon",
+            phase: "INTEGRATION",
+            type: "AVENANT",
+            grade: "2eme_classe",
+            echelon: 2
+        });
+        
+        // Direct Integration
+        baseTypes.push({
+            value: "integration_directe_cat4",
+            label: "Intégration directe",
+            description: "Intégration au grade 2ème classe, 3ème échelon",
+            phase: "TITULARISATION",
+            grade: "2eme_classe",
+            echelon: 3
+        });
+    }
     
-        return baseTypes;
-    };
+    // Add reclassification option for all categories during integration phase
+    baseTypes.push({
+        value: "reclassement",
+        label: "Reclassement",
+        description: "Reclassement possible pendant la phase d'intégration (6 ans)",
+        phase: "INTEGRATION",
+        type: "RECLASSEMENT",
+        conditions: ["poste_budgetaire_disponible", "diplome_correspondant"]
+    });
+    
+    return baseTypes;
+};
     
     const handleAgentSelect = (agent) => {
         setSelectedAgent(agent);
@@ -338,40 +429,42 @@ const MultiStepForm = ({ auth, agents }) => {
 
                             {/* Contract Type */}
                             <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                                Type de Contrat
-                            </label>
-                            <select
-                                name="type"
-                                value={data.type}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                disabled={!selectedAgent}
-                            >
-                                {availableContractTypes.map((type) => (
-                                    <option key={type.value} value={type.value}>
-                                        {type.label}
-                                    </option>
-                                ))}
-                            </select>
+        <label className="block text-sm font-medium text-gray-700">
+            Type de Contrat
+        </label>
+        <select
+            name="type"
+            value={data.type}
+            onChange={handleInputChange} // Ensure this handles updating data.type correctly
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            disabled={!selectedAgent} // Disable the select if no agent is selected
+        >
+            <option value="" disabled>
+                Choisir un type de contrat
+            </option>
+            {availableContractTypes.map((type) => (
+                <option key={type.value} value={type.value}>
+                    {type.label}
+                </option>
+            ))}
+        </select>
 
-                            {!selectedAgent && (
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Veuillez d'abord sélectionner un agent
-                                </p>
-                            )}
+        {!selectedAgent && (
+            <p className="mt-1 text-sm text-gray-500">
+                Veuillez d'abord sélectionner un agent
+            </p>
+        )}
 
-                            {selectedAgent && data.type && (
-                                <p className="p-2 mt-2 text-sm text-gray-600 rounded-md bg-gray-50">
-                                    {availableContractTypes.find(t => t.value === data.type)?.description}
-                                </p>
-                            )}
+        {selectedAgent && data.type && (
+            <p className="p-2 mt-2 text-sm text-gray-600 rounded-md bg-gray-50">
+                {availableContractTypes.find((t) => t.value === data.type)?.description}
+            </p>
+        )}
 
-                            {errors.type && (
-                                <div className="mt-1 text-sm text-red-500">{errors.type}</div>
-                            )}
-                        </div>
-
+        {errors.type && (
+            <div className="mt-1 text-sm text-red-500">{errors.type}</div>
+        )}
+    </div>
 
 
                             {/* Contract Number */}
