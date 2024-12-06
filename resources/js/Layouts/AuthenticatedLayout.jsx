@@ -1,184 +1,141 @@
-    import { useState } from 'react';
-    import { Link } from '@inertiajs/react';
-    import { useEffect} from "react";
-    import Echo from "laravel-echo";
-    import Pusher from "pusher-js";
-    import { 
-        FiMenu, 
-        FiX, 
-        FiHome,
-        FiUsers,
-        FiSettings,
-        FiHelpCircle,
-        FiBell,
-        FiChevronDown,
-        FiGrid,
-        FiPieChart,
-        FiFolder, FiFileText, FiTrendingUp, FiCalendar 
-    } from 'react-icons/fi';
+import { useState } from 'react';
+import { Link, usePage } from '@inertiajs/react';
+import { 
+    FiMenu, 
+    FiX, 
+    FiGrid,
+    FiUsers,
+    FiFileText,
+    FiCalendar,
+    FiTrendingUp,
+    FiBell,
+    FiChevronDown,
+    FiSettings,
+    FiLogOut
+} from 'react-icons/fi';
 
+export default function Authenticated({ user, children }) {
+    const { url } = usePage();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-    export default function Authenticated({ user,children }) {
-        const [sidebarOpen, setSidebarOpen] = useState(false);
-        const [profileOpen, setProfileOpen] = useState(false);
+    const navigationItems = [
+        { name: 'Tableau de Board', href: '/dashboard', icon: FiGrid, roles: ['admin', 'RH', 'agent'] },
+        { name: 'Agent', href: '/agent', icon: FiUsers, roles: ['RH'] },
+        { name: 'Contrat', href: '/contrat', icon: FiFileText, roles: ['RH'] },
+        { name: 'Integration', href: '/integration-phases', icon: FiCalendar, roles: ['RH'] },
+        { name: 'Avancement', href: '/avancement', icon: FiFileText, roles: ['RH'] },
+        { name: 'Service Rendu', href: '/serviceRendu', icon: FiCalendar, roles: ['RH'] },
+        { name: 'Reclassement', href: '/reclassements', icon: FiTrendingUp, roles: ['RH'] },
+        { name: 'Retraite', href: '/retirement', icon: FiCalendar, roles: ['RH'] },
+        { name: 'Parcours', href: '/employe/parcours', icon: FiFileText, roles: ['agent'] },
+        { name: 'Contrats', href: '/employe/contrats', icon: FiFileText, roles: ['agent'] },
+        { name: 'Avancements', href: '/employe/avancements', icon: FiTrendingUp, roles: ['agent'] },
+    ];
 
-        const navigationItems = [
-            { name: 'Tableau de Board', href: route('dashboard'), icon: FiGrid, roles: ['admin', 'RH', 'agent'] },
-            { name: 'Agent', href: route('agent.index'), icon: FiUsers, roles: ['RH'] },
-            { name: 'Contrat', href: route('contrat.index'), icon: FiFileText, roles: ['RH'] },
-            { name: 'Integration', href: route('integration-phase.index'), icon: FiCalendar, roles: ['RH'] },
-            { name: 'Avancement', href: route('advancements.index'), icon: FiFileText, roles: ['RH'] },
-            { name: 'Service Rendu', href: route('service.index'), icon: FiCalendar, roles: ['RH'] },
-            { name: 'Reclassement', href: '#', icon: FiTrendingUp, roles: ['RH'] },
-            { name: 'Retraite', href: route('retirement.index'), icon: FiCalendar, roles: ['RH'] },
-            { name: 'Parcours', href: route('employe.parcours'), icon: FiFileText, roles: ['agent'] },
-            { name: 'Contrats', href: route('employe.contrats'), icon: FiFileText, roles: ['agent'] },
-            { name: 'Avancements', href: route('employe.avancements'), icon: FiTrendingUp, roles: ['agent'] },
-        ];
+    const filteredNavigationItems = navigationItems.filter(item => 
+        item.roles.includes(user.role)
+    );
 
-        const filteredNavigationItems = navigationItems.filter(item => 
-            item.roles.includes(user.role)
-        );
+    const isCurrentRoute = (href) => {
+        return url.startsWith(href);
+    };
 
-        const [notifications, setNotifications] = useState([]);
-        const [notificationsOpen, setNotificationsOpen] = useState(false);
-
-        // useEffect(() => {
-        //     const echo = new Echo({
-        //         broadcaster: 'reverb',
-        //         key: import.meta.env.VITE_REVERB_APP_KEY,
-        //         host: import.meta.env.VITE_REVERB_HOST,
-        //         port: import.meta.env.VITE_REVERB_PORT,
-        //         scheme: import.meta.env.VITE_REVERB_SCHEME,
-        //         forceTLS: true,
-        //     });
-
-        //     echo.channel('retirement-notifications')
-        //         .listen('RetirementNotificationEvent', (event) => {
-        //             setNotifications(prevNotifications => [
-        //                 ...prevNotifications,
-        //                 {
-        //                     id: event.time,
-        //                     message: event.message,
-        //                     time: event.time
-        //                 }
-        //             ]);
-        //         });
-
-        //     return () => {
-        //         echo.leaveChannel('retirement-notifications');
-        //     };
-        // }, []);
-
-        useEffect(() => {
-            const echo = window.Echo;
-        
-            // Listen to the 'retirement-notifications' channel for the 'RetirementNotificationEvent'
-            echo.channel('retirement-notifications')
-                .listen('RetirementNotificationEvent', (event) => {
-                    setNotifications(prevNotifications => [
-                        ...prevNotifications,
-                        {
-                            id: event.time,
-                            message: event.message,
-                            time: event.time,
-                        },
-                    ]);
-                });
-        
-            return () => {
-                // Clean up by leaving the channel when the component is unmounted
-                echo.leaveChannel('retirement-notifications');
-            };
-        }, []);
-        
-        return (
-            <div className="min-h-screen bg-slate-50">
-                {/* Sidebar */}
-                <div className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
-                    sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                } lg:translate-x-0`}>
-                    <div className="flex items-center justify-between h-16 px-6 bg-gradient-to-r from-violet-600 to-indigo-600">
-                        <Link href="/" className="text-2xl font-bold text-white">
-                            Dashboard
-                        </Link>
-                        <button
-                            onClick={() => setSidebarOpen(false)}
-                            className="text-white lg:hidden hover:text-gray-200"
-                        >
-                            <FiX className="w-6 h-6" />
-                        </button>
-                    </div>
-
-                    <nav className="px-4 mt-8">
-                        {filteredNavigationItems.map((item) => (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={`flex items-center px-4 py-3 mb-2 text-gray-600 rounded-xl hover:bg-gradient-to-r hover:from-violet-50 hover:to-indigo-50 hover:text-violet-600 transition-all duration-300 ${
-                                    route().current(item.href) ? 'bg-gradient-to-r from-violet-50 to-indigo-50 text-violet-600 shadow-sm' : ''
-                                }`}
-                            >
-                                <item.icon className="w-5 h-5 mr-3" />
-                                <span className="font-medium">{item.name}</span>
-                            </Link>
-                        ))}
-                    </nav>
+    return (
+        <div className="min-h-screen bg-gray-50">
+            {/* Sidebar */}
+            <div className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out transform ${
+                sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            } lg:translate-x-0`}>
+                {/* Logo Section */}
+                <div className="flex items-center h-16 px-6 bg-indigo-600">
+                    <Link href="/" className="flex items-center space-x-3">
+                        <div className="flex items-center justify-center w-8 h-8 bg-white rounded-lg">
+                            <span className="text-xl font-bold text-indigo-600">M</span>
+                        </div>
+                        <span className="text-xl font-semibold text-white">Modernize</span>
+                    </Link>
                 </div>
 
-                {/* Main Content */}
-                <div className="flex flex-col min-h-screen lg:ml-64">
-                    {/* Navbar */}
-                    <nav className="sticky top-0 h-16 bg-white shadow-sm backdrop-blur-sm bg-white/80">
-                        <div className="flex items-center justify-between h-full px-6 mx-auto max-w-7xl">
+                {/* Navigation */}
+                <div className="p-4">
+                    <nav className="space-y-1">
+                        {filteredNavigationItems.map((item) => {
+                            const isActive = isCurrentRoute(item.href);
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 group ${
+                                        isActive
+                                            ? 'text-white bg-indigo-600 shadow-md'
+                                            : 'text-gray-600 hover:bg-indigo-50'
+                                    }`}
+                                >
+                                    <item.icon className={`w-5 h-5 mr-3 transition-colors ${
+                                        isActive
+                                            ? 'text-white'
+                                            : 'text-gray-400 group-hover:text-indigo-600'
+                                    }`} />
+                                    {item.name}
+                                </Link>
+                            );
+                        })}
+                    </nav>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="lg:ml-64">
+                {/* Top Navigation Bar */}
+                <nav className="sticky top-0 z-30 bg-white shadow-sm">
+                    <div className="px-4 sm:px-6">
+                        <div className="flex items-center justify-between h-16">
+                            {/* Mobile Menu Button */}
                             <button
                                 onClick={() => setSidebarOpen(true)}
-                                className="text-gray-600 lg:hidden hover:text-gray-900"
+                                className="p-2 text-gray-600 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
                             >
                                 <FiMenu className="w-6 h-6" />
                             </button>
 
-                            {/* Right-aligned elements */}
-                            <div className="flex items-center ml-auto space-x-6">
-                                {/* Search - Optional */}
-                                <div className="hidden md:block">
+                            {/* Search Bar */}
+                            <div className="flex-1 hidden max-w-xs ml-8 md:block">
+                                <div className="relative">
                                     <input
                                         type="text"
-                                        placeholder="Search..."
-                                        className="w-64 px-4 py-2 text-sm transition-all bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-violet-500"
+                                        placeholder="Rechercher..."
+                                        className="w-full h-10 pl-4 pr-10 text-sm bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-indigo-500"
                                     />
                                 </div>
+                            </div>
 
+                            {/* Right Section */}
+                            <div className="flex items-center space-x-4">
                                 {/* Notifications */}
                                 <div className="relative">
-                <button
-                    onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="relative p-2 text-gray-600 transition-colors hover:text-violet-600 focus:outline-none"
-                >
-                    <FiBell className="w-6 h-6" />
-                    <span className="absolute w-2 h-2 rounded-full top-1 right-1 bg-rose-500 ring-2 ring-white"></span>
-                </button>
-
-                {notificationsOpen && (
-                    <div className="absolute right-0 z-50 py-2 mt-3 bg-white border border-gray-100 shadow-lg w-80 rounded-xl">
-                        <div className="px-4 py-2 border-b border-gray-100">
-                            <h3 className="font-semibold text-gray-900">Notifications</h3>
-                        </div>
-                        {notifications.map((notification) => (
-                            <div
-                                key={notification.id}
-                                className="px-4 py-3 transition-colors cursor-pointer hover:bg-gray-50"
-                            >
-                                <p className="text-sm text-gray-800">{notification.message}</p>
-                                <p className="mt-1 text-xs text-gray-500">{notification.time}</p>
-                            </div>
-                        ))}
-                        <div className="px-4 py-2 mt-1 border-t border-gray-100">
-                            <Link href="#" className="text-sm text-violet-600 hover:text-violet-700">View all notifications</Link>
-                        </div>
-                    </div>
-                )}
-            </div>
+                                    <button
+                                        onClick={() => setNotificationsOpen(!notificationsOpen)}
+                                        className="p-2 text-gray-600 rounded-lg hover:bg-gray-100 focus:outline-none"
+                                    >
+                                        <FiBell className="w-6 h-6" />
+                                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                                    </button>
+                                    
+                                    {notificationsOpen && (
+                                        <div className="absolute right-0 mt-2 overflow-hidden bg-white rounded-lg shadow-xl w-80">
+                                            <div className="p-4 border-b bg-indigo-50">
+                                                <h3 className="text-sm font-semibold text-indigo-900">Notifications</h3>
+                                            </div>
+                                            <div className="divide-y divide-gray-100">
+                                                <div className="p-4 hover:bg-gray-50">
+                                                    <p className="text-sm text-gray-800">Pas de notifications</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Profile Dropdown */}
                                 <div className="relative">
@@ -186,55 +143,61 @@
                                         onClick={() => setProfileOpen(!profileOpen)}
                                         className="flex items-center space-x-3 focus:outline-none"
                                     >
-                                        <div className="flex items-center justify-center text-white rounded-full shadow-sm w-9 h-9 bg-gradient-to-r from-violet-500 to-indigo-500">
-                                            {user.name.charAt(0)}
+                                        <div className="relative flex items-center justify-center w-10 h-10 bg-indigo-100 rounded-full">
+                                            <span className="text-sm font-medium text-indigo-600">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </span>
                                         </div>
-                                        <span className="hidden font-medium text-gray-700 sm:block">{user.name}</span>
-                                        <FiChevronDown className="hidden w-4 h-4 text-gray-600 sm:block" />
+                                        <div className="hidden md:block">
+                                            <div className="text-sm font-medium text-gray-700">{user.name}</div>
+                                            <div className="text-xs text-gray-500">{user.role}</div>
+                                        </div>
+                                        <FiChevronDown className="hidden w-4 h-4 text-gray-400 md:block" />
                                     </button>
 
                                     {profileOpen && (
-                                        <div className="absolute right-0 z-50 w-48 py-2 mt-3 bg-white border border-gray-100 shadow-lg rounded-xl">
-                                            <div className="px-4 py-2 border-b border-gray-100">
-                                                <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                                                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                                        <div className="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-xl">
+                                            <div className="py-1">
+                                                <Link
+                                                    href="/profile"
+                                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                >
+                                                    <FiSettings className="w-4 h-4 mr-2" />
+                                                    Paramètres
+                                                </Link>
+                                                <form action="/logout" method="POST">
+                                                    <button
+                                                        type="submit"
+                                                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                                    >
+                                                        <FiLogOut className="w-4 h-4 mr-2" />
+                                                        Déconnexion
+                                                    </button>
+                                                </form>
                                             </div>
-                                            <Link
-                                                href={route('profile.edit')}
-                                                className="flex items-center px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
-                                            >
-                                                <FiSettings className="w-4 h-4 mr-2" />
-                                                Profile Settings
-                                            </Link>
-                                            <Link
-                                                href={route('logout')}
-                                                method="post"
-                                                as="button"
-                                                className="flex items-center w-full px-4 py-2 text-sm text-left transition-colors text-rose-600 hover:bg-rose-50"
-                                            >
-                                                <FiX className="w-4 h-4 mr-2" />
-                                                Log Out
-                                            </Link>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         </div>
-                    </nav>
+                    </div>
+                </nav>
 
-                    {/* Page Content */}
-                    <main className="flex-1 w-full p-6 mx-auto max-w-7xl">
+                {/* Main Content Area */}
+                <main className="p-6">
+                    <div className="mx-auto max-w-7xl">
                         {children}
-                    </main>
-                </div>
-
-                {/* Overlay */}
-                {sidebarOpen && (
-                    <div
-                        className="fixed inset-0 z-20 bg-gray-900/20 backdrop-blur-sm lg:hidden"
-                        onClick={() => setSidebarOpen(false)}
-                    ></div>
-                )}
+                    </div>
+                </main>
             </div>
-        );
-    }
+
+            {/* Mobile Sidebar Overlay */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                ></div>
+            )}
+        </div>
+    );
+}

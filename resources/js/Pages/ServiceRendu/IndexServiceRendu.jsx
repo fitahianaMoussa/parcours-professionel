@@ -14,6 +14,7 @@ import {
     PlusCircle,
     ClipboardList,
     User,
+    Eye,
 } from "lucide-react";
 
 export default function ServiceRenduIndex({ auth, services }) {
@@ -147,6 +148,9 @@ export default function ServiceRenduIndex({ auth, services }) {
                                             <span>Statut</span>
                                         </div>
                                     </th>
+                                    <th className="px-6 py-3 text-left">
+                                        <span className="sr-only">Actions</span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
@@ -167,6 +171,14 @@ export default function ServiceRenduIndex({ auth, services }) {
                                         </td>
                                         <td className="px-6 py-4">
                                             {getStatusIcon(service.is_active)}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <Link href={route('service.show', service.id)}>
+                                                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                                    <Eye size={16} />
+                                                    Détails
+                                                </button>
+                                            </Link>
                                         </td>
                                     </tr>
                                 ))}

@@ -62,6 +62,7 @@ Route::middleware(['auth','role:RH'])->group(function () {
         Route::get('/create', [ContratController::class, 'create'])->name('contrat.create');
         Route::get('/', [ContratController::class, 'index'])->name('contrat.index');
         Route::post('/', [ContratController::class, 'store'])->name('contrat.store');
+        Route::get('/{contrat}', [ContratController::class, 'show'])->name('contrat.show');
     });
 
     Route::prefix('avancement')->group(function () {
@@ -88,6 +89,8 @@ Route::middleware(['auth','role:RH'])->group(function () {
         Route::get('/', [ServiceRenduController::class, 'index'])->name('service.index');
         Route::post('/', [ServiceRenduController::class, 'store'])->name('service.store');
         Route::get('/releve/{agent}', [ServiceRenduController::class, 'releveService'])->name('service.releve');
+        Route::get('/{serviceRendu}', [ServiceRenduController::class, 'show'])
+        ->name('service.show');
     });
     Route::get('/integration-phases', [IntegrationPhaseController::class, 'index'])
         ->name('integration-phase.index');
@@ -95,6 +98,11 @@ Route::middleware(['auth','role:RH'])->group(function () {
     // Détails d'un agent en phase d'intégration
     Route::get('/integration-phases/{agent}', [IntegrationPhaseController::class, 'show'])
         ->name('integration-phase.show');
+        Route::patch('/integration/{agent}', [IntegrationPhaseController::class, 'update'])
+        ->name('integration-phase.update');
+    // 3: Gestion de la stagiarisation
+    Route::get('/integration/{agent}/stagiarisation', [IntegrationPhaseController::class, 'showStagiarisation'])
+        ->name('integration-phase.stagiarisation');
     Route::get('/career-management', [CareerManagementController::class, 'index'])->name('career.index');
     Route::get('/career-management/{agent}', [CareerManagementController::class, 'show'])->name('career.show');
     Route::post('/career-management/{agent}/process', [CareerManagementController::class, 'processProgression'])->name('career.process');
@@ -107,12 +115,10 @@ Route::middleware(['auth','role:RH'])->group(function () {
 
     // Search archived retirees
     Route::get('/archives', [EmployeeRetirementController::class, 'archiveSearch'])->name('archives.index');
-    Route::prefix('reclassements')->group(function () {
-        Route::get('/agents-eligibles', [ReclassementController::class, 'agentsEligibles']);
-        Route::post('/reclasser/{agent}', [ReclassementController::class, 'reclasser']);
-        Route::get('/historiques', [ReclassementController::class, 'historiquesReclassements'])
-    ->name('reclassements.historiques');
-    });
+    Route::get('/reclassements', [ReclassementController::class, 'index'])->name('reclassements.index');
+    Route::get('/reclassements/agents-eligibles', [ReclassementController::class, 'agentsEligibles'])->name('reclassements.agents-eligibles');
+    Route::post('/reclassements/{agentId}', [ReclassementController::class, 'reclasser'])->name('reclassements.reclasser');
+    Route::get('/reclassements/historique/{agentId?}', [ReclassementController::class, 'historiquesReclassements'])->name('reclassements.historique');
 
     Route::get('/test-pusher', function () {
         broadcast(new TestNotificationEvent('Pusher fonctionne correctement !'));

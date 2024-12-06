@@ -3,10 +3,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Service\ReclassementService;
+
 use App\Models\Agent;
 use App\Models\Categorie;
 use App\Models\Reclassement;
+use App\Service\Reclassements;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -15,7 +16,7 @@ class ReclassementController extends Controller
 {
     private $reclassementService;
 
-    public function __construct(ReclassementService $reclassementService)
+    public function __construct(Reclassements $reclassementService)
     {
         $this->reclassementService = $reclassementService;
     }

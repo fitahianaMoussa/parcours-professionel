@@ -72,13 +72,23 @@ class ServiceRenduController extends Controller
 
     }
 
-    /**
-     * Display the specified resource.
+     /**
+     * Afficher les détails d'un service rendu spécifique.
+     *
+     * @param ServiceRendu $serviceRendu
+     * @return \Inertia\Response
      */
     public function show(ServiceRendu $serviceRendu)
     {
-        //
+        // Charger le service rendu avec ses relations
+        $serviceRendu->load(['agent', 'reference']);
+        
+        return Inertia::render('ServiceRendu/Show', [
+            'service' => $serviceRendu->toArray(),
+            'pageTitle' => 'Détails du Service',
+        ]);
     }
+
 
     /**
      * Show the form for editing the specified resource.

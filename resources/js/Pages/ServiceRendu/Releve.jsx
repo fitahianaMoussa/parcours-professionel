@@ -113,26 +113,49 @@ const groupedAvancements = avancements.reduce((acc, item) => {
 
 
   
-    <tbody>
-      {Object.keys(groupedAvancements).map((type) => (
-        <React.Fragment key={type}>
-          <tr>
-            <td colSpan="3" className="text-lg font-bold">{type}</td>
+            <tbody>
+  {Object.keys(groupedAvancements).map((type) => {
+    // Définir le titre basé sur le type
+    let titre = "Non défini";
+    if (type === "INTEGRATION") {
+      titre = "CONTRACTUEL EFA";
+    } else if (type === "AVANCEMENT") {
+      titre = "INTEGREE DANS LE CORPS DES FONCTIONNEMENTS";
+    } else if (type === "STAGE") {
+      titre = "INTEGREE";
+    } else if (type === "TITULARISATION") {
+      titre = "TITULARISÉE";
+    }
+
+    return (
+      <React.Fragment key={type}>
+        <tr>
+          <td colSpan="3" className="text-lg font-bold">{titre}</td>
+        </tr>
+        {groupedAvancements[type].map((item, index) => (
+          <tr key={index} className="bg-white even:bg-gray-50">
+            <td className="px-4 py-2 border border-gray-400">
+              {item.agent?.corps || "Non défini"}{" "}
+              {item.grade?.grade === "STAGE"
+                ? "stagiaire"
+                : item.grade?.grade || "Non défini"}
+              {item.grade?.grade !== "STAGE" &&
+                `_${item.grade?.echelon || "Non défini"} echelon`}
+            </td>
+            <td className="px-4 py-2 border border-gray-400">
+              {formatDate(item.arrete?.date_effet)}
+            </td>
+            <td className="px-4 py-2 border border-gray-400">
+              {item.arrete?.numero_arrete || "Non défini"} du{" "}
+              {formatDate(item.arrete?.date_arrete)}
+            </td>
           </tr>
-          {groupedAvancements[type].map((item, index) => (
-            <tr key={index} className="bg-white even:bg-gray-50">
-              <td className="px-4 py-2 border border-gray-400">
-                {item.agent?.corps || "Non défini"} {item.grade?.grade === "STAGE" ? "stagiaire" : item.grade?.grade || "Non défini"}{item.grade?.grade !== "STAGE" && `_${item.grade?.echelon || "Non défini"} echelon`}
-              </td>
-              <td className="px-4 py-2 border border-gray-400">{formatDate(item.arrete?.date_effet)}</td>
-              <td className="px-4 py-2 border border-gray-400">
-                {item.arrete?.numero_arrete || "Non défini"} du {formatDate(item.arrete?.date_arrete)}
-              </td>
-            </tr>
-          ))}
-        </React.Fragment>
-      ))}
-    </tbody>
+        ))}
+      </React.Fragment>
+    );
+  })}
+</tbody>
+
   
 
           </table>

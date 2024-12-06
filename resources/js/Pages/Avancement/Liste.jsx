@@ -14,171 +14,203 @@ import {
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 
 const AdvancementsList = ({ avancements, auth }) => {
-    console.log(avancements)
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    // Status color mapping
-    const getStatusColor = (status) => {
-        switch(status) {
-            case 'integrated':
-                return 'bg-green-100 text-green-800';
-            case 'pending':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'rejected':
-                return 'bg-red-100 text-red-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
+    const getStatusConfig = (status) => {
+        const configs = {
+            integrated: {
+                classes: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+                icon: <CheckCircle className="w-4 h-4 mr-1.5" />,
+                label: 'Intégré'
+            },
+            pending: {
+                classes: 'bg-amber-50 text-amber-700 border border-amber-200',
+                icon: <AlertCircle className="w-4 h-4 mr-1.5" />,
+                label: 'En attente'
+            },
+            rejected: {
+                classes: 'bg-red-50 text-red-700 border border-red-200',
+                icon: <AlertCircle className="w-4 h-4 mr-1.5" />,
+                label: 'Rejeté'
+            },
+            default: {
+                classes: 'bg-gray-50 text-gray-700 border border-gray-200',
+                icon: null,
+                label: status
+            }
+        };
+        return configs[status] || configs.default;
     };
 
-    // Filtering logic
     const filteredAvancements = avancements.filter(advancement => 
         advancement.agent.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         advancement.agent.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         advancement.grade.grade.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Pagination
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredAvancements.slice(indexOfFirstItem, indexOfLastItem);
-
     const totalPages = Math.ceil(filteredAvancements.length / itemsPerPage);
 
     return (
         <Authenticated user={auth.user}>
             <Head title="Liste des Avancements" />
             
-            <div className="container px-4 py-8 mx-auto">
-                <div className="bg-white rounded-lg shadow-md">
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h2 className="flex items-center text-2xl font-semibold text-gray-800">
-                            <ArrowUp className="mr-3 text-blue-600" />
-                            Liste des Avancements
-                        </h2>
-                        <div className="flex items-center space-x-4">
-                            <div className="relative">
-                                <input 
-                                    type="text" 
-                                    placeholder="Rechercher..."
-                                    value={searchTerm}
-                                    onChange={(e) => {
-                                        setSearchTerm(e.target.value);
-                                        setCurrentPage(1);
-                                    }}
-                                    className="py-2 pl-10 pr-4 border rounded-md focus:ring-2 focus:ring-blue-500"
-                                />
-                                <Search className="absolute text-gray-400 left-3 top-3" size={20} />
+            <div className="min-h-screen py-8 bg-gray-50">
+                <div className="px-4 mx-auto max-w-10xl sm:px-6 lg:px-8">
+                    {/* Main Content Container */}
+                    <div className="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl">
+                        {/* Header Section */}
+                        <div className="border-b border-gray-200">
+                            <div className="flex flex-col justify-between gap-4 px-6 py-5 sm:flex-row sm:items-center">
+                                <h1 className="flex items-center text-2xl font-bold text-gray-900">
+                                    <ArrowUp className="w-6 h-6 mr-3 text-indigo-600" />
+                                    Liste des Avancements
+                                </h1>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative flex-1 sm:flex-none">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Rechercher un agent..."
+                                            value={searchTerm}
+                                            onChange={(e) => {
+                                                setSearchTerm(e.target.value);
+                                                setCurrentPage(1);
+                                            }}
+                                            className="w-full py-2 pl-10 pr-4 text-sm transition-shadow duration-200 border border-gray-300 rounded-lg sm:w-64 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        />
+                                        <Search className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" size={18} />
+                                    </div>
+                                    <button className="p-2 transition-colors duration-200 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                        <Filter size={18} className="text-gray-500" />
+                                    </button>
+                                </div>
                             </div>
-                            <button className="p-2 bg-gray-100 rounded-md hover:bg-gray-200">
-                                <Filter size={20} className="text-gray-600" />
-                            </button>
                         </div>
-                    </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-100 border-b">
-                                <tr>
-                                    {[
-                                        'Agent', , 'Grade', 'Periode', 
-                                        'Date Effet', 'Durée (Mois)', 'Statut', 'Actions'
-                                    ].map((header) => (
-                                        <th 
-                                            key={header} 
-                                            className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
-                                        >
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {currentItems.map(advancement => (
-                                    <tr 
-                                        key={advancement.id} 
-                                        className="transition-colors hover:bg-gray-50"
-                                    >
-                                        <td className="flex items-center px-6 py-4 whitespace-nowrap">
-                                            <User className="mr-2 text-blue-500" size={20} />
-                                            {advancement.agent.nom} {advancement.agent.prenom}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {advancement.grade.grade}_{advancement.grade.echelon} Echelon
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <Calendar className="inline mr-2 text-gray-500" size={16} />
-                                            {advancement.date_debut} - {advancement.date_fin}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <Calendar className="inline mr-2 text-blue-500" size={16} />
-                                            {advancement.date_effet}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {advancement.duree_mois}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span 
-                                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                    getStatusColor(advancement.status)
-                                                }`}
+                        {/* Table Section */}
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        {[
+                                            'Agent', 'Grade', 'Période', 
+                                            'Date Effet', 'Durée', 'Statut', 'Actions'
+                                        ].map((header) => (
+                                            <th 
+                                                key={header} 
+                                                className="px-6 py-4 text-sm font-semibold text-left text-gray-600"
                                             >
-                                                {advancement.status === 'integrated' && <CheckCircle className="mr-1" size={14} />}
-                                                {advancement.status === 'pending' && <AlertCircle className="mr-1" size={14} />}
-                                                {advancement.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <Link 
-                                                href={route('advancements.show', { id: advancement.id })}
-                                                className="text-blue-600 hover:text-blue-900 hover:underline"
-                                            >
-                                                Détails
-                                            </Link>
-                                        </td>
+                                                {header}
+                                            </th>
+                                        ))}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Pagination */}
-                    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
-                        <div className="text-sm text-gray-600">
-                            Page {currentPage} sur {totalPages} 
-                            {` (${filteredAvancements.length} résultats)`}
+                                </thead>
+                                <tbody className="divide-y divide-gray-200">
+                                    {currentItems.map(advancement => (
+                                        <tr 
+                                            key={advancement.id} 
+                                            className="transition-colors duration-150 group hover:bg-gray-50"
+                                        >
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center">
+                                                    <div className="flex items-center justify-center w-8 h-8 mr-3 bg-indigo-100 rounded-full">
+                                                        <User className="text-indigo-600" size={16} />
+                                                    </div>
+                                                    <div className="text-sm">
+                                                        <div className="font-medium text-gray-900">
+                                                            {advancement.agent.nom} {advancement.agent.prenom}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="text-sm text-gray-700">
+                                                    {advancement.grade.grade} - {advancement.grade.echelon} Echelon
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center text-sm text-gray-600">
+                                                    <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                                                    <span>{advancement.date_debut} - {advancement.date_fin}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center text-sm text-gray-600">
+                                                    <Calendar className="w-4 h-4 mr-2 text-indigo-500" />
+                                                    <span>{advancement.date_effet}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="text-sm text-gray-600">
+                                                    {advancement.duree_mois} mois
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {(() => {
+                                                    const config = getStatusConfig(advancement.status);
+                                                    return (
+                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${config.classes}`}>
+                                                            {config.icon}
+                                                            {config.label}
+                                                        </span>
+                                                    );
+                                                })()}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <Link 
+                                                    href={route('advancements.show', { id: advancement.id })}
+                                                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
+                                                >
+                                                    Détails
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                        <div className="flex space-x-2">
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className={`
-                                    flex items-center px-3 py-1.5 rounded-md text-sm transition-colors
-                                    ${currentPage === 1 
-                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                                    }
-                                `}
-                            >
-                                <ChevronLeft className="mr-1" size={16} />
-                                Précédent
-                            </button>
-                            <button 
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className={`
-                                    flex items-center px-3 py-1.5 rounded-md text-sm transition-colors
-                                    ${currentPage === totalPages 
-                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                                    }
-                                `}
-                            >
-                                Suivant
-                                <ChevronRight className="ml-1" size={16} />
-                            </button>
+
+                        {/* Pagination Section */}
+                        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                                <div className="text-sm text-gray-600">
+                                    <span className="font-medium">{filteredAvancements.length}</span> résultats • Page <span className="font-medium">{currentPage}</span> sur <span className="font-medium">{totalPages}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                        className={`
+                                            inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                            ${currentPage === 1 
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                                            }
+                                        `}
+                                    >
+                                        <ChevronLeft className="w-4 h-4 mr-1.5" />
+                                        Précédent
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                        className={`
+                                            inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                            ${currentPage === totalPages 
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                                            }
+                                        `}
+                                    >
+                                        Suivant
+                                        <ChevronRight className="w-4 h-4 ml-1.5" />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

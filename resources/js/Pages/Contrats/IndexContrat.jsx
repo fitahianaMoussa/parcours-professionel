@@ -8,20 +8,17 @@ import {
     ChevronLeft,
     ChevronRight,
     UserCheck,
-    GraduationCap,
-    Calendar,
-    Building2,
     FileText,
+    Calendar,
     CheckCircle2,
     XCircle,
     PlusCircle,
     ClipboardList,
-    Clock,
     AlertCircle,
     CheckSquare,
-    FileWarning
+    FileWarning,
+    Eye
 } from "lucide-react";
-
 
 export default function AgentIndex({ auth, contrats }) {
     const [searchTerm, setSearchTerm] = useState("");
@@ -69,10 +66,10 @@ export default function AgentIndex({ auth, contrats }) {
 
     const getContractTypeColor = (type) => {
         const types = {
-            "CDI": "bg-emerald-100 text-emerald-800",
-            "CDD": "bg-blue-100 text-blue-800",
-            "Stage": "bg-purple-100 text-purple-800",
-            "Interim": "bg-orange-100 text-orange-800"
+            "integration": "bg-emerald-100 text-emerald-800",
+            "reclassement": "bg-blue-100 text-blue-800",
+            "titularisation": "bg-purple-100 text-purple-800",
+            "avenant signé": "bg-orange-100 text-orange-800"
         };
         return types[type] || "bg-gray-100 text-gray-800";
     };
@@ -95,39 +92,52 @@ export default function AgentIndex({ auth, contrats }) {
         <AuthenticatedLayout user={auth.user}>
             <Head title="Gestion des Contrats" />
 
-            <div className="max-w-6xl p-6 mx-auto bg-white rounded-lg shadow-lg">
-                <div className="mb-6">
+            <div className="p-6 mx-auto space-y-6">
+                {/* Header Section */}
+                <div className="p-6 bg-white rounded-lg shadow-sm">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="flex items-center gap-2 mb-4 text-2xl font-bold text-gray-800">
-                            <ClipboardList className="text-blue-600" />
-                            Gestion des Contrats
-                        </h2>
+                        <div className="space-y-1">
+                            <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-800">
+                                <ClipboardList className="text-blue-600" />
+                                Gestion des Contrats
+                            </h2>
+                            <p className="text-sm text-gray-500">
+                                Gérez et suivez tous les contrats des agents
+                            </p>
+                        </div>
                         <Link href={route('contrat.create')}>
-                            <button className="flex items-center gap-2 px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700">
+                            <button className="flex items-center gap-2 px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                 <PlusCircle size={20} />
                                 Nouveau Contrat
                             </button>
                         </Link>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 mb-6">
+                    <div className="flex flex-wrap items-center gap-4">
                         <div className="relative flex-1 min-w-[300px]">
                             <Search className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" size={20} />
                             <input
                                 type="text"
                                 placeholder="Rechercher par nom ou type de contrat..."
-                                className="w-full py-2 pl-10 pr-4 text-gray-700 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full py-2 pl-10 pr-4 text-gray-700 transition-colors border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <FileText size={16} />
+                            Total: {sortedAgents.length} contrats
+                        </div>
                     </div>
+                </div>
 
-                    <div className="overflow-x-auto rounded-lg">
+                {/* Table Section */}
+                <div className="overflow-hidden bg-white rounded-lg shadow-sm">
+                    <div className="overflow-x-auto">
                         <table className="w-full border-collapse">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left cursor-pointer hover:bg-gray-100"
+                                    <th className="px-6 py-3 text-left cursor-pointer group hover:bg-gray-100"
                                         onClick={() => handleSort("nom")}>
                                         <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
                                             <UserCheck size={18} className="text-blue-600" />
@@ -152,16 +162,7 @@ export default function AgentIndex({ auth, contrats }) {
                                         </div>
                                     </th>
                                     <th className="px-6 py-3 text-left">
-                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                                            <FileWarning size={18} className="text-blue-600" />
-                                            <span>Renouvellement</span>
-                                        </div>
-                                    </th>
-                                    <th className="px-6 py-3 text-left">
-                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                                            <CheckSquare size={18} className="text-blue-600" />
-                                            <span>Statut</span>
-                                        </div>
+                                        <span className="sr-only">Actions</span>
                                     </th>
                                 </tr>
                             </thead>
@@ -188,25 +189,17 @@ export default function AgentIndex({ auth, contrats }) {
                                                 <Calendar size={16} className="text-gray-400" />
                                                 <span>
                                                     {new Date(agent.date_debut).toLocaleDateString()} - 
-                                                    {new Date(agent.date_fin).toLocaleDateString()}
+                                                    {agent.date_fin ? new Date(agent.date_fin).toLocaleDateString() : 'En cours'}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {agent.is_renouvellement ? (
-                                                <div className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
-                                                    <CheckCircle2 size={16} />
-                                                    <span>Renouvelable</span>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-red-700 bg-red-100 rounded-full">
-                                                    <XCircle size={16} />
-                                                    <span>Non renouvelable</span>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {getStatusIcon(agent.is_active)}
+                                            <Link href={route('contrat.show', agent.id)}>
+                                                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                                    <Eye size={16} />
+                                                    Détails
+                                                </button>
+                                            </Link>
                                         </td>
                                     </tr>
                                 ))}
@@ -214,7 +207,8 @@ export default function AgentIndex({ auth, contrats }) {
                         </table>
                     </div>
 
-                    <div className="flex items-center justify-between mt-6">
+                    {/* Pagination */}
+                    <div className="flex items-center justify-between px-6 py-4 border-t">
                         <div className="text-sm text-gray-500">
                             Affichage {startIndex + 1} - {Math.min(startIndex + itemsPerPage, sortedAgents.length)} sur {sortedAgents.length} contrats
                         </div>
@@ -222,7 +216,7 @@ export default function AgentIndex({ auth, contrats }) {
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
-                                className="p-2 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-2 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
                                 <ChevronLeft size={20} />
                             </button>
@@ -232,7 +226,7 @@ export default function AgentIndex({ auth, contrats }) {
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}
-                                className="p-2 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-2 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
                                 <ChevronRight size={20} />
                             </button>

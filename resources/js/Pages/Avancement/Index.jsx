@@ -1,17 +1,14 @@
 import { useForm, Link } from "@inertiajs/react";
-import React, { useState } from 'react';
+import React from 'react';
 import { ArrowUp, Check, X, PlusCircle, List } from 'lucide-react';
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 
 const AdvancementManagement = ({ eligibleAgents, auth }) => {
-    console.log(eligibleAgents);
-
-    // Ensure eligibleAgents is an array
     const agentsArray = Array.isArray(eligibleAgents) 
         ? eligibleAgents 
         : Object.values(eligibleAgents);
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing } = useForm({
         agents: agentsArray.map(agent => ({
             id: agent.id,
             approved: false,
@@ -31,118 +28,130 @@ const AdvancementManagement = ({ eligibleAgents, auth }) => {
         e.preventDefault();
         post(route('advancements.evaluate'), {
             preserveScroll: true,
-            onSuccess: () => {
-                // Optional: Add toast or notification
-            }
         });
     };
 
     return (
         <Authenticated user={auth.user}>
-            <div className="container px-4 py-8 mx-auto">
-                <div className="flex justify-end mb-4 space-x-4">
-                    <Link 
-                        href={route('advancements.create')} 
-                        className="flex items-center px-4 py-2 text-white transition-colors bg-green-600 rounded-md hover:bg-green-700"
-                    >
-                        <PlusCircle className="w-5 h-5 mr-2" />
-                        Créer un Avancement
-                    </Link>
-                    <Link 
-                        href={route('advancements.indexListe')} 
-                        className="flex items-center px-4 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
-                    >
-                        <List className="w-5 h-5 mr-2" />
-                        Liste des Avancements
-                    </Link>
-                </div>
-
-                <div className="overflow-hidden bg-white rounded-lg shadow-md">
-                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h2 className="flex items-center text-2xl font-semibold text-gray-800">
-                            <ArrowUp className="mr-3 text-blue-600" />
-                            Agents éligible pour avancement
-                        </h2>
-                    </div>
-                    
-                    <form onSubmit={submitAdvancements}>
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-gray-100 border-b">
-                                    <tr>
-                                        {['Nom', 'Prénom', 'Catégorie', 'Date Entrée', 'Éligible', 'Actions'].map((header) => (
-                                            <th key={header} className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                                {header}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {agentsArray.map(agent => {
-                                        const isApproved = data.agents.find(a => a.id === agent.id)?.approved;
-                                        
-                                        return (
-                                            <tr key={agent.id} className="transition-colors hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">{agent.nom}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{agent.prenom}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{agent.categorie?.nom || 'N/A'}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{agent.date_entree}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">
-                                                        Éligible
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex space-x-2">
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => handleApproval(agent.id, true)}
-                                                            className={`flex items-center px-3 py-1.5 rounded-md text-sm transition-colors ${
-                                                                isApproved 
-                                                                ? 'bg-green-600 text-white' 
-                                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                            }`}
-                                                        >
-                                                            <Check className="w-4 h-4 mr-1" />
-                                                            Approuver
-                                                        </button>
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => handleApproval(agent.id, false)}
-                                                            className={`flex items-center px-3 py-1.5 rounded-md text-sm transition-colors ${
-                                                                !isApproved 
-                                                                ? 'bg-red-600 text-white' 
-                                                                : 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                            }`}
-                                                        >
-                                                            <X className="w-4 h-4 mr-1" />
-                                                            Refuser
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="flex justify-end px-6 py-4 border-t border-gray-200 bg-gray-50">
-                            <button 
-                                type="submit" 
-                                disabled={processing}
-                                className={`
-                                    flex items-center px-6 py-2 rounded-md text-white font-semibold transition-colors
-                                    ${processing 
-                                        ? 'bg-blue-400 cursor-not-allowed' 
-                                        : 'bg-blue-600 hover:bg-blue-700'
-                                    }
-                                `}
+            <div className="min-h-screen py-8 bg-gray-50">
+                <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
+                    {/* Header Actions */}
+                    <div className="flex flex-col items-start justify-between gap-4 mb-8 sm:flex-row sm:items-center">
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            Gestion des Avancements
+                        </h1>
+                        <div className="flex flex-wrap gap-3">
+                            <Link 
+                                href={route('advancements.create')} 
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors duration-200 rounded-lg shadow-sm bg-emerald-600 hover:bg-emerald-700 hover:shadow-md"
                             >
-                                {processing ? 'Traitement...' : 'Valider les Avancements'}
-                            </button>
+                                <PlusCircle className="w-5 h-5 mr-2" />
+                                Créer un Avancement
+                            </Link>
+                            <Link 
+                                href={route('advancements.indexListe')} 
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 hover:shadow-md"
+                            >
+                                <List className="w-5 h-5 mr-2" />
+                                Liste des Avancements
+                            </Link>
                         </div>
-                    </form>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="bg-white border border-gray-200 shadow-sm rounded-xl">
+                        <div className="px-6 py-5 border-b border-gray-200">
+                            <div className="flex items-center">
+                                <ArrowUp className="w-6 h-6 mr-3 text-indigo-600" />
+                                <h2 className="text-xl font-semibold text-gray-900">
+                                    Agents éligibles pour avancement
+                                </h2>
+                            </div>
+                        </div>
+                        
+                        <form onSubmit={submitAdvancements}>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gray-50">
+                                            {['Nom', 'Prénom', 'Catégorie', 'Date Entrée', 'Éligibilité', 'Actions'].map((header) => (
+                                                <th key={header} className="px-6 py-4 text-sm font-semibold text-left text-gray-600">
+                                                    {header}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200">
+                                        {agentsArray.map(agent => {
+                                            const isApproved = data.agents.find(a => a.id === agent.id)?.approved;
+                                            
+                                            return (
+                                                <tr key={agent.id} className="transition-colors duration-150 group hover:bg-gray-50">
+                                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{agent.nom}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">{agent.prenom}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">{agent.categorie?.nom || 'N/A'}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700">{agent.date_entree}</td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                                            Éligible
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => handleApproval(agent.id, true)}
+                                                                className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                                                    isApproved 
+                                                                    ? 'bg-emerald-600 text-white shadow-sm' 
+                                                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                                                }`}
+                                                            >
+                                                                <Check className="w-4 h-4 mr-1.5" />
+                                                                Approuver
+                                                            </button>
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => handleApproval(agent.id, false)}
+                                                                className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                                                    !isApproved 
+                                                                    ? 'bg-red-600 text-white shadow-sm' 
+                                                                    : 'bg-red-50 text-red-700 hover:bg-red-100'
+                                                                }`}
+                                                            >
+                                                                <X className="w-4 h-4 mr-1.5" />
+                                                                Refuser
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                                <div className="flex justify-end">
+                                    <button 
+                                        type="submit" 
+                                        disabled={processing}
+                                        className={`
+                                            inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-lg shadow-sm
+                                            transition-all duration-200
+                                            ${processing 
+                                                ? 'bg-indigo-400 cursor-not-allowed opacity-75' 
+                                                : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-md'
+                                            }
+                                            text-white
+                                        `}
+                                    >
+                                        {processing ? 'Traitement en cours...' : 'Valider les Avancements'}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </Authenticated>

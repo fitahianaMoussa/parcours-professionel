@@ -118,7 +118,20 @@ class ContratController extends Controller
      */
     public function show(Contrat $contrat)
     {
-        //
+        return Inertia::render('Contrats/Detail', [
+            'contrat' => $contrat->load([
+                'agent.categorie',  // Load agent and their category
+                'agent.contrats',   // Load agent's other contracts
+                'arretes'          // Load arrêtés for this contract
+            ])
+        ]);
+    }
+
+    public function showContrat(Agent $agent)
+    {
+        return Inertia::render('Agents/Show', [
+            'agent' => $agent->load(['categorie', 'contrats.arretes'])
+        ]);
     }
 
     /**

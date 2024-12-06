@@ -33,5 +33,9 @@ public function Agent()
     {
         return $this->hasMany(Avancement::class);
     }
+    public function arretes()
+    {
+        return $this->hasMany(Arrete::class);
+    }
 
 }

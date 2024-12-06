@@ -1,108 +1,71 @@
+// resources/js/Pages/Reclassement/Index.jsx
 import React, { useState } from 'react';
-import { Users, ArrowUpRight, History, Search } from 'lucide-react';
+import { Head } from '@inertiajs/react';
+import { UserGroupIcon, ArrowPathIcon, ClockIcon } from '@heroicons/react/24/outline';
+import AgentList from './AgentList';
+import ReclassementModal from './ReclassementModal';
+import Authenticated from '@/Layouts/AuthenticatedLayout';
 
-// Page principale des reclassements
-const ReclassementIndex = ({ categories, initialAgents }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
 
-  const filteredAgents = initialAgents.filter(agent => {
-    const matchesSearch = 
-      agent.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      agent.prenom.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = 
-      !selectedCategory || agent.categorie.id === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+export default function Index({ categories, initialAgents ,auth}) {
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <Users className="w-8 h-8 text-blue-600" />
-          Gestion des Reclassements
-        </h1>
-      </div>
+    <Authenticated user={auth.user}>
+    <div className="min-h-screen py-6 bg-gray-100">
+      <Head title="Gestion des Reclassements" />
+      
+      <div className="px-2 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Gestion des Reclassements
+            </h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Gérez les reclassements des agents éligibles
+            </p>
+          </div>
+          
+          <div className="flex space-x-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700"
+            >
+              <ArrowPathIcon className="w-5 h-5 mr-2" />
+              Actualiser
+            </button>
+            
+            <a
+              href={route('reclassements.historique')}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700"
+            >
+              <ClockIcon className="w-5 h-5 mr-2" />
+              Historique
+            </a>
+          </div>
+        </div>
 
-      <div className="flex gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-          <input
-            type="text"
-            placeholder="Rechercher un agent..."
-            className="w-full py-2 pl-10 pr-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+        <div className="mt-8 overflow-hidden bg-white rounded-lg shadow">
+          <AgentList
+            agents={initialAgents}
+            onReclassement={(agent) => {
+              setSelectedAgent(agent);
+              setIsModalOpen(true);
+            }}
           />
         </div>
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="border border-gray-300 rounded-lg p-2 w-[200px]"
-        >
-          <option value="">Toutes les catégories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.nom}
-            </option>
-          ))}
-        </select>
       </div>
 
-      <div className="overflow-hidden bg-white rounded-lg shadow-md">
-        <div className="p-4 bg-gray-100">
-          <h2 className="text-xl font-semibold">Agents Éligibles au Reclassement</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 text-left">Nom</th>
-                <th className="px-4 py-2 text-left">Prénom</th>
-                <th className="px-4 py-2 text-left">Catégorie Actuelle</th>
-                <th className="px-4 py-2 text-left">Status</th>
-                <th className="px-4 py-2 text-left">Date d'entrée</th>
-                <th className="px-4 py-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAgents.map((agent) => (
-                <tr key={agent.id}>
-                  <td className="px-4 py-2 font-medium">{agent.nom}</td>
-                  <td className="px-4 py-2">{agent.prenom}</td>
-                  <td className="px-4 py-2">{agent.categorie.nom}</td>
-                  <td className="px-4 py-2">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      agent.status === 'actif' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {agent.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2">{new Date(agent.date_entree).toLocaleDateString()}</td>
-                  <td className="px-4 py-2">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => window.location.href = `/reclassement/reclasser/${agent.id}`}
-                        className="p-2 text-blue-600 hover:text-blue-800"
-                      >
-                        <ArrowUpRight className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => window.location.href = `/reclassement/historique/${agent.id}`}
-                        className="p-2 text-gray-600 hover:text-gray-800"
-                      >
-                        <History className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {isModalOpen && (
+        <ReclassementModal
+          agent={selectedAgent}
+          categories={categories}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
+    </Authenticated>
   );
-};
-
-export { ReclassementIndex };
+}

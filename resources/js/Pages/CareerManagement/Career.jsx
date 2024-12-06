@@ -1,17 +1,12 @@
 import React, { useState } from "react";
-import { CircleUser, Clock, Award, ChevronRight, FileText } from "lucide-react";
+import { CircleUser, Clock, Award, ChevronRight, FileText, Calendar, Briefcase, Settings } from "lucide-react";
 import CareerProgressionManager from "./Progression";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
-// const formatCategory = (category) => {
-//     return category.replace(/\s+/g, "_").toUpperCase();
-// };
+
 const CareerDashboard = ({ agent, progression, careerPaths, auth }) => {
-    console.log(careerPaths);
-    // const [selectedCategory, setSelectedCategory] = useState(agent.categorie?.nom?.toUpperCase() || 'CATEGORY_III');
     const agentCategory = agent.categorie?.nom || "Categorie III";
-    const [selectedCategory, setSelectedCategory] = useState(
-        agentCategory
-    );
+    const [selectedCategory, setSelectedCategory] = useState(agentCategory);
+    
     const gradeLabels = {
         "2eme_classe": "2ème Classe",
         "1ere_classe": "1ère Classe",
@@ -20,84 +15,83 @@ const CareerDashboard = ({ agent, progression, careerPaths, auth }) => {
     };
 
     const tabs = [
-        { value: "career-path", label: "Parcours" },
-        { value: "contracts", label: "Contrats" },
-        { value: "advancement", label: "Avancements" },
-        { value: "documents", label: "Arrêtés" },
+        { value: "career-path", label: "Parcours", icon: Briefcase },
+        { value: "contracts", label: "Contrats", icon: FileText },
+        { value: "advancement", label: "Avancements", icon: ChevronRight },
+        { value: "documents", label: "Arrêtés", icon: Settings },
     ];
 
     const [activeTab, setActiveTab] = useState(tabs[0].value);
 
     return (
         <Authenticated user={auth.user}>
-            <div className="min-h-screen p-6 bg-gray-50">
-                <header className="mb-8">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight">
-                                Parcours
-                            </h1>
-                            <p className="text-gray-500">
-                                Agent: {agent.nom} {agent.prenom}
-                            </p>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-sm text-gray-500">
-                                Matricule: {agent.matricule}
+            <div className="min-h-screen bg-gray-50">
+                <div className="px-6 py-8 mx-auto max-w-7xl">
+                    <header className="mb-8">
+                        <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-sm">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 text-white bg-blue-500 rounded-full">
+                                    <CircleUser className="w-8 h-8" />
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                                        {agent.nom} {agent.prenom}
+                                    </h1>
+                                    <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                                        <span>Matricule: {agent.matricule}</span>
+                                        <span>•</span>
+                                        <span>Catégorie: {selectedCategory}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="text-sm text-gray-500">
-                                Catégorie: {selectedCategory}
+                            <div className="px-4 py-2 text-sm text-blue-600 rounded-full bg-blue-50">
+                                Statut: {progression.type}
                             </div>
                         </div>
-                    </div>
-                </header>
+                    </header>
 
-                <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-4">
-                    <StatusCard progression={progression} />
-                    <IntegrationCard progression={progression} />
-                    <CurrentGradeCard
-                        progression={progression}
-                        gradeLabels={gradeLabels}
-                    />
-                    <NextProgressionCard progression={progression} />
-                </div>
-
-                <div className="bg-white rounded-lg shadow">
-                    <div className="border-b border-gray-200">
-                        <nav className="flex">
-                            {tabs.map((tab) => (
-                                <button
-                                    key={tab.value}
-                                    onClick={() => setActiveTab(tab.value)}
-                                    className={`px-4 py-3 text-sm font-medium border-b-2 ${
-                                        activeTab === tab.value
-                                            ? "border-blue-500 text-blue-600"
-                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                    }`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </nav>
+                    <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-4">
+                        <StatusCard progression={progression} />
+                        <IntegrationCard progression={progression} />
+                        <CurrentGradeCard progression={progression} gradeLabels={gradeLabels} />
+                        <NextProgressionCard progression={progression} />
                     </div>
 
-                    <div className="p-6">
-                        {activeTab === "career-path" && (
-                            <CareerPathTab
-                                careerPath={careerPaths[selectedCategory]}
-                                progression={progression}
-                                gradeLabels={gradeLabels}
-                            />
-                        )}
-                        {activeTab === "contracts" && (
-                            <ContractsTab agent={agent} />
-                        )}
-                        {activeTab === "advancement" && (
-                            <AdvancementTab agent={agent} />
-                        )}
-                        {activeTab === "documents" && (
-                            <DocumentsTab agent={agent} />
-                        )}
+                    <div className="bg-white rounded-lg shadow">
+                        <div className="border-b border-gray-200">
+                            <nav className="flex p-2 space-x-2">
+                                {tabs.map((tab) => {
+                                    const Icon = tab.icon;
+                                    return (
+                                        <button
+                                            key={tab.value}
+                                            onClick={() => setActiveTab(tab.value)}
+                                            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-lg transition-colors
+                                                ${activeTab === tab.value 
+                                                    ? "bg-blue-50 text-blue-600" 
+                                                    : "text-gray-600 hover:bg-gray-50"
+                                                }`}
+                                        >
+                                            <Icon className="w-4 h-4" />
+                                            {tab.label}
+                                        </button>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+
+                        <div className="p-6">
+                            {activeTab === "career-path" && (
+                                <CareerPathTab 
+                                    careerPath={careerPaths[selectedCategory]}
+                                    progression={progression}
+                                    gradeLabels={gradeLabels}
+                                />
+                            )}
+                            {activeTab === "contracts" && <ContractsTab agent={agent} />}
+                            {activeTab === "advancement" && <AdvancementTab agent={agent} />}
+                            {activeTab === "documents" && <DocumentsTab agent={agent} />}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,61 +100,51 @@ const CareerDashboard = ({ agent, progression, careerPaths, auth }) => {
 };
 
 const CardWrapper = ({ title, description, children, icon: Icon }) => (
-    <div className="bg-white border border-gray-200 rounded-lg shadow">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-            <div>
-                <h3 className="text-sm font-medium text-gray-900">{title}</h3>
-                {description && (
-                    <p className="text-xs text-gray-500">{description}</p>
-                )}
-            </div>
+    <div className="p-6 bg-white rounded-lg shadow">
+        <div className="flex items-center justify-between pb-2">
+            <h3 className="text-sm font-medium text-gray-900">{title}</h3>
             {Icon && <Icon className="w-4 h-4 text-gray-500" />}
         </div>
-        <div className="p-4">{children}</div>
+        <div>
+            {children}
+            {description && <p className="mt-1 text-xs text-gray-500">{description}</p>}
+        </div>
     </div>
 );
 
 const StatusCard = ({ progression }) => (
     <CardWrapper title="Statut Actuel" icon={CircleUser}>
-        <div className="text-2xl font-bold">{progression.type}</div>
-        <p className="text-sm text-gray-500">
-            Phase: {progression.phase || "N/A"}
-        </p>
+        <div className="text-2xl font-bold text-gray-900">{progression.type}</div>
+        <div className="mt-1 text-sm text-gray-500">Phase: {progression.phase || "N/A"}</div>
     </CardWrapper>
 );
 
 const IntegrationCard = ({ progression }) => (
     <CardWrapper title="Intégration" icon={Clock}>
-        <div className="text-2xl font-bold">
-            {progression.type === "INTEGRATION"
-                ? `Phase ${progression.phase}/3`
-                : "Complétée"}
+        <div className="text-2xl font-bold text-gray-900">
+            {progression.type === "INTEGRATION" ? `Phase ${progression.phase}/3` : "Complétée"}
         </div>
-        <p className="text-sm text-gray-500">
-            {progression.remaining_days
+        <div className="mt-1 text-sm text-gray-500">
+            {progression.remaining_days 
                 ? `${progression.remaining_days} jours restants`
                 : "Processus terminé"}
-        </p>
+        </div>
     </CardWrapper>
 );
 
 const CurrentGradeCard = ({ progression, gradeLabels }) => (
     <CardWrapper title="Grade & Échelon" icon={Award}>
-        <div className="text-2xl font-bold">
-            {gradeLabels[progression.grade]}
-        </div>
-        <p className="text-sm text-gray-500"> {progression.echelon} Échelon</p>
+        <div className="text-2xl font-bold text-gray-900">{gradeLabels[progression.grade]}</div>
+        <div className="mt-1 text-sm text-gray-500">Échelon {progression.echelon}</div>
     </CardWrapper>
 );
 
 const NextProgressionCard = ({ progression }) => (
-    <CardWrapper title="Prochaine Étape" icon={ChevronRight}>
-        <div className="text-2xl font-bold">
+    <CardWrapper title="Prochaine Étape" icon={Calendar}>
+        <div className="text-2xl font-bold text-gray-900">
             {new Date(progression.end_date).toLocaleDateString()}
         </div>
-        <p className="text-sm text-gray-500">
-            Durée: {progression.duration} mois
-        </p>
+        <div className="mt-1 text-sm text-gray-500">Durée: {progression.duration} mois</div>
     </CardWrapper>
 );
 
@@ -170,75 +154,170 @@ const CareerPathTab = ({ careerPath, progression, gradeLabels }) => {
         ...value,
     })) : [];
 
-    // Render your component here
-
-
-
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow">
-            <div className="px-4 py-3 border-b border-gray-200">
-                <h2 className="text-lg font-bold">Parcours de Carrière</h2>
-                <p className="text-sm text-gray-500">
-                    Progression détaillée par phase
-                </p>
-            </div>
-            <div className="p-4 space-y-6">
-                {phases.map((phase, index) => (
-                    <div
-                        key={index}
-                        className="pl-4 border-l-2 border-blue-500"
-                    >
-                        <h3 className="mb-2 text-lg font-bold">{phase.type}</h3>
+        <div className="space-y-8">
+            {phases.map((phase, index) => (
+                <div key={index} className="relative">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full">
+                            {index + 1}
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900">{phase.type}</h3>
+                    </div>
+                    
+                    <div className="pl-12 space-y-4">
                         {phase.phases ? (
-                            <div className="space-y-4">
-                                {phase.phases.map((subPhase, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex items-center justify-between"
-                                    >
+                            phase.phases.map((subPhase, idx) => (
+                                <div key={idx} className="p-4 transition-shadow bg-white rounded-lg shadow hover:shadow-md">
+                                    <div className="flex items-center justify-between">
                                         <div>
-                                            <div className="font-medium">
-                                                Phase {idx + 1}
-                                            </div>
-                                            <div className="text-sm text-gray-500">
-                                                Durée: {subPhase.duration} mois
-                                            </div>
+                                            <div className="font-medium text-gray-900">Phase {idx + 1}</div>
+                                            <div className="text-sm text-gray-500">Durée: {subPhase.duration} mois</div>
                                         </div>
                                         {subPhase.grade && (
-                                            <div className="text-sm">
-                                                {gradeLabels[subPhase.grade]} -
-                                                {subPhase.echelon} Échelon 
+                                            <div className="px-3 py-1 text-sm text-blue-700 rounded-full bg-blue-50">
+                                                {gradeLabels[subPhase.grade]} - Échelon {subPhase.echelon}
                                             </div>
                                         )}
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            ))
                         ) : phase.progression ? (
-                            <div className="space-y-4">
-                                {phase.progression.map((step, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex items-center justify-between"
-                                    >
+                            phase.progression.map((step, idx) => (
+                                <div 
+                                    key={idx} 
+                                    className={`p-4 bg-white rounded-lg shadow transition-shadow hover:shadow-md
+                                        ${progression.grade === step.grade && progression.echelon === step.echelon 
+                                            ? "border-2 border-blue-500 bg-blue-50" 
+                                            : ""
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
                                         <div>
-                                            <div className="font-medium">
-                                                {gradeLabels[step.grade]} -
-                                                 {step.echelon} Échelon
+                                            <div className="font-medium text-gray-900">
+                                                {gradeLabels[step.grade]} - Échelon {step.echelon}
                                             </div>
-                                            <div className="text-sm text-gray-500">
-                                                Durée: {step.duration} mois
+                                            <div className="text-sm text-gray-500">Durée: {step.duration} mois</div>
+                                        </div>
+                                        {progression.grade === step.grade && progression.echelon === step.echelon && (
+                                            <div className="px-3 py-1 text-sm text-blue-700 bg-blue-100 rounded-full">
+                                                Position actuelle
                                             </div>
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                            {progression.grade === step.grade &&
-                                                progression.echelon ===
-                                                    step.echelon &&
-                                                "(Position actuelle)"}
-                                        </div>
+                                        )}
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            ))
                         ) : null}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const ContractsTab = ({ agent }) => {
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">Historique des Contrats</h2>
+                <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                    Nouveau Contrat
+                </button>
+            </div>
+            
+            <div className="overflow-hidden bg-white rounded-lg shadow ring-1 ring-black ring-opacity-5">
+                <table className="min-w-full divide-y divide-gray-300">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Type</th>
+                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date Début</th>
+                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date Fin</th>
+                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Statut</th>
+                            <th className="relative py-3.5 pl-3 pr-4">
+                                <span className="sr-only">Actions</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td className="py-4 pl-4 pr-3 text-sm text-gray-900">CDD</td>
+                            <td className="px-3 py-4 text-sm text-gray-500">01/01/2024</td>
+                            <td className="px-3 py-4 text-sm text-gray-500">31/12/2024</td>
+                            <td className="px-3 py-4">
+                                <span className="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">
+                                    Actif
+                                </span>
+                            </td>
+                            <td className="py-4 pl-3 pr-4 text-sm font-medium text-right">
+                                <button className="text-blue-600 hover:text-blue-900">Voir</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+const AdvancementTab = ({ agent }) => {
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">Historique des Avancements</h2>
+            </div>
+            
+            <div className="space-y-4">
+                <div className="p-6 bg-white rounded-lg shadow">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-900">Avancement en Grade</h3>
+                            <p className="mt-1 text-sm text-gray-500">Principal → Exceptionnel</p>
+                        </div>
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-0.5 text-sm font-medium text-blue-800">
+                            En cours
+                        </span>
+                    </div>
+                    <div className="pt-4 mt-4 border-t border-gray-200">
+                        <div className="text-sm text-gray-500">
+                            Date prévue: <span className="font-medium text-gray-900">01/06/2024</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const DocumentsTab = ({ agent }) => {
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">Arrêtés et Documents</h2>
+                <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                    Nouveau Document
+                </button>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((doc) => (
+                    <div key={doc} className="p-6 transition-shadow bg-white rounded-lg shadow hover:shadow-md">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-900">Arrêté N°2024-{doc}</h3>
+                                <p className="mt-1 text-sm text-gray-500">Nomination</p>
+                            </div>
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                                PDF
+                            </span>
+                        </div>
+                        <div className="mt-4 text-sm text-gray-500">
+                            Date: 01/0{doc}/2024
+                        </div>
+                        <div className="mt-4">
+                            <button className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                Télécharger
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -246,124 +325,6 @@ const CareerPathTab = ({ careerPath, progression, gradeLabels }) => {
     );
 };
 
-const ContractsTab = ({ agent }) => (
-    <div className="bg-white border border-gray-200 rounded-lg shadow">
-        <div className="px-4 py-3 border-b border-gray-200">
-            <h2 className="text-lg font-bold">Contrats</h2>
-            <p className="text-sm text-gray-500">Historique des contrats</p>
-        </div>
-        <div className="p-4 space-y-4">
-            {agent.contrats?.map((contrat, index) => (
-                <div
-                    key={index}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                    <div>
-                        <h4 className="font-medium">
-                            Contrat N° {contrat.numero_contrat}
-                        </h4>
-                        <p className="text-sm text-gray-500">
-                            {new Date(contrat.date_debut).toLocaleDateString()}{" "}
-                            → {new Date(contrat.date_fin).toLocaleDateString()}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                            Type: {contrat.type}
-                        </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <span
-                            className={`px-2 py-1 rounded-full text-xs ${
-                                contrat.status === "en cours"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-gray-100 text-gray-800"
-                            }`}
-                        >
-                            {contrat.status}
-                        </span>
-                    </div>
-                </div>
-            ))}
-        </div>
-    </div>
-);
 
-const AdvancementTab = ({ agent, progression }) => (
-    <div className="bg-white border border-gray-200 rounded-lg shadow">
-        <CareerProgressionManager
-            agent={agent}
-            currentProgression={progression}
-        />
-        <div className="px-4 py-3 border-b border-gray-200">
-            <h2 className="text-lg font-bold">Avancements</h2>
-            <p className="text-sm text-gray-500">Historique des avancements</p>
-        </div>
-        <div className="p-4 space-y-4">
-            {agent.avancements?.map((avancement, index) => (
-                <div
-                    key={index}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                    <div>
-                        <h4 className="font-medium">
-                            {avancement.is_integration
-                                ? "Intégration"
-                                : "Avancement"}{" "}
-                            - Phase {avancement.contract_phase}
-                        </h4>
-                      
-                        <p className="text-sm text-gray-500">
-                            {new Date(
-                                avancement.date_debut
-                            ).toLocaleDateString()}{" "}
-                            →{" "}
-                            {new Date(avancement.date_fin).toLocaleDateString()}
-                        </p>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                        {avancement.duree_mois} mois
-                    </div>
-                </div>
-            ))}
-        </div>
-    </div>
-);
-
-const DocumentsTab = ({ agent }) => (
-    <div className="bg-white border border-gray-200 rounded-lg shadow">
-        <div className="px-4 py-3 border-b border-gray-200">
-            <h2 className="text-lg font-bold">Arrêtés</h2>
-            <p className="text-sm text-gray-500">Documents administratifs</p>
-        </div>
-        <div className="p-4 space-y-4">
-            {agent.avancements.arrete?.map((arrete, index) => (
-                <div
-                    key={index}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                    <div className="flex items-center space-x-4">
-                        <FileText className="w-6 h-6 text-gray-400" />
-                        <div>
-                            <h4 className="font-medium">
-                                {arrete.numero_arrete}
-                            </h4>
-                            <p className="text-sm text-gray-500">
-                                {arrete.type_arrete} -{" "}
-                                {new Date(
-                                    arrete.date_arrete
-                                ).toLocaleDateString()}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                                {arrete.objet}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                        Signé à {arrete.lieu_signature}
-                    </div>
-                </div>
-            ))}
-        </div>
-    </div>
-);
 
 export default CareerDashboard;
