@@ -3,6 +3,7 @@
 use App\Events\TestNotificationEvent;
 use App\Http\Controllers\AdvancementController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\ArreteController;
 use App\Http\Controllers\AvancementController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CareerManagementController;
@@ -128,7 +129,7 @@ Route::middleware(['auth','role:RH'])->group(function () {
     
 // Route pour afficher la page principale de gestion de carrière
 Route::get('/careerProcessor/{agentId}', [CareerProcessorController::class, 'index'])
-    ->name('career.index');
+    ->name('caree.index');
 
 // Route pour traiter les données de carrière de l'agent
 Route::post('/career/{agentId}/process', [CareerProcessorController::class, 'processCareer'])
@@ -156,6 +157,7 @@ Route::get('/career/{agentId}/contracts', [CareerProcessorController::class, 'ge
     Route::get('/agents/{agentId}/check-advancement-eligibility', [ContractController::class, 'checkAdvancementEligibility'])->name('agents.check-advancement-eligibility');
     Route::get('/agents/{agentId}/remaining-duration', [ContractController::class, 'getRemainingDuration'])->name('agents.remaining-duration');
     Route::get('/test-career-path/{agentId}', [ContractController::class, 'testCareerPath'])->name('parcours.test');
+    Route::put('/arretes/{arrete}', [ArreteController::class, 'update'])->name('arretes.update');
 });
 Route::middleware(['auth','role:agent'])->group(function () {
     Route::get('/parcours',[EmployeController::class,'EmployeParcours'])->name('employe.parcours');

@@ -151,12 +151,7 @@ export default function AgentIndex({ auth, contrats }) {
                                             <span>Période</span>
                                         </div>
                                     </th>
-                                    <th className="px-6 py-3 text-left">
-                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                                            <FileWarning size={18} className="text-blue-600" />
-                                            <span>Renouvellement</span>
-                                        </div>
-                                    </th>
+                                  
                                     <th className="px-6 py-3 text-left">
                                         <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
                                             <CheckSquare size={18} className="text-blue-600" />
@@ -192,19 +187,7 @@ export default function AgentIndex({ auth, contrats }) {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            {agent.is_renouvellement ? (
-                                                <div className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
-                                                    <CheckCircle2 size={16} />
-                                                    <span>Renouvelable</span>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-red-700 bg-red-100 rounded-full">
-                                                    <XCircle size={16} />
-                                                    <span>Non renouvelable</span>
-                                                </div>
-                                            )}
-                                        </td>
+                                      
                                         <td className="px-6 py-4">
                                             {getStatusIcon(agent.is_active)}
                                         </td>

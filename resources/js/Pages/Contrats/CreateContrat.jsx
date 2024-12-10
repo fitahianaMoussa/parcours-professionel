@@ -76,8 +76,8 @@ const getContractTypesByCategory = (agent) => {
     
     const baseTypes = [];
     const category = agent.categorie.niveau.trim();
-    const isCategory3 = category === "Category III";
-    const isCategory4 = category === "Category IV";
+    const isCategory3 = category === "Categorie III";
+    const isCategory4 = category === "Categorie IV";
     
     // Handle Category III contracts
     if (isCategory3) {
@@ -337,7 +337,16 @@ const getContractTypesByCategory = (agent) => {
             data.date_effet
         );
     };
-
+    const availableContractType = [
+        { value: "integration", label: "Intégration" },
+        { value: "reclassement", label: "Reclassement" },
+        { value: "titularisation", label: "Titularisation" },
+        { value: "avenant signé", label: "Avenant signé" },
+        { value: "stage", label: "Stage" },
+        { value: "avancement", label: "Avancement" },
+        { value: "contractuel EFA", label: "Contractuel EFA" },
+    ];
+    
     return (
         <Authenticated user={auth.user}>
             <Head title="Créer contrat" />
@@ -442,7 +451,7 @@ const getContractTypesByCategory = (agent) => {
             <option value="" disabled>
                 Choisir un type de contrat
             </option>
-            {availableContractTypes.map((type) => (
+            {availableContractType.map((type) => (
                 <option key={type.value} value={type.value}>
                     {type.label}
                 </option>

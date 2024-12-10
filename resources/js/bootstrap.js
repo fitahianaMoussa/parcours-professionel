@@ -19,19 +19,14 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 window.Echo = new Echo({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY,
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1',
-    wsHost: import.meta.env.VITE_PUSHER_HOST || '127.0.0.1',
-    wsPort: import.meta.env.VITE_PUSHER_PORT || 6001,
-    forceTLS: import.meta.env.VITE_PUSHER_SCHEME === 'https',
-    disableStats: true,
+    broadcaster: 'reverb',
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: import.meta.env.VITE_REVERB_HOST,
+    wsPort: import.meta.env.VITE_REVERB_PORT,
+    wssPort: import.meta.env.VITE_REVERB_PORT,
+    forceTLS: false,
+    enabledTransports: ['ws', 'wss'],
 });
-
-window.Echo.connector.pusher.connection.bind('state_change', (states) => {
-    console.log('Connection State Change:', states);
-});
-
 window.Echo.connector.pusher.connection.bind('error', (error) => {
     console.error('Connection Error:', error);
 });

@@ -98,7 +98,7 @@ const AdvancementsList = ({ avancements, auth }) => {
                                     <tr className="border-b border-gray-200 bg-gray-50">
                                         {[
                                             'Agent', 'Grade', 'Période', 
-                                            'Date Effet', 'Durée', 'Statut', 'Actions'
+                                            'Date Effet', 'Durée', 'Actions'
                                         ].map((header) => (
                                             <th 
                                                 key={header} 
@@ -148,17 +148,6 @@ const AdvancementsList = ({ avancements, auth }) => {
                                                 <span className="text-sm text-gray-600">
                                                     {advancement.duree_mois} mois
                                                 </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {(() => {
-                                                    const config = getStatusConfig(advancement.status);
-                                                    return (
-                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${config.classes}`}>
-                                                            {config.icon}
-                                                            {config.label}
-                                                        </span>
-                                                    );
-                                                })()}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <Link 

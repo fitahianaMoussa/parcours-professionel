@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessContractJob;
 use App\Models\Agent;
 use App\Models\Contrat;
 use App\Service\ContratService;
@@ -54,7 +55,6 @@ class ContractController extends Controller
         try {
         
           $agent = $this->contractService->createInitialContracts($agent);
-            //dd($agent);
             return redirect()->route('contracts.index', $agentId)->with('flash', [
                 'success' => 'Les contrats initiaux ont été créés avec succès.',
             ]);
@@ -231,28 +231,11 @@ class ContractController extends Controller
 
 
     public function testCareerPath($agentId)
-    {
-        // Trouver l'agent par ID
-        $agent = Agent::find($agentId);
+{
+    $agent = Agent::findOrFail($agentId); // Load the model
+    ProcessContractJob::dispatch($agent);
 
-        if ($agent) {
-            // Appeler la méthode pour traiter le parcours de carrière de l'agent
-            try {
-                $this->contractService->processCompleteCareerPath($agent);
+    return redirect()->back()->with('success', 'Contract processing started');
+}
 
-                return response()->json([
-                    'message' => 'Le parcours de carrière a été traité avec succès pour l\'agent ' . $agent->name,
-                ]);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'error' => 'Une erreur est survenue lors du traitement du parcours de carrière.',
-                    'details' => $e->getMessage(),
-                ], 500);
-            }
-        } else {
-            return response()->json([
-                'error' => 'Agent non trouvé.',
-            ], 404);
-        }
-    }
 }

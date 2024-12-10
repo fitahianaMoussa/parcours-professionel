@@ -144,11 +144,6 @@ export default function ServiceRenduIndex({ auth, services }) {
                                         </div>
                                     </th>
                                     <th className="px-6 py-3 text-left">
-                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                                            <span>Statut</span>
-                                        </div>
-                                    </th>
-                                    <th className="px-6 py-3 text-left">
                                         <span className="sr-only">Actions</span>
                                     </th>
                                 </tr>
@@ -168,9 +163,6 @@ export default function ServiceRenduIndex({ auth, services }) {
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-500">
                                             {service.reference?.type}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {getStatusIcon(service.is_active)}
                                         </td>
                                         <td className="px-6 py-4">
                                             <Link href={route('service.show', service.id)}>

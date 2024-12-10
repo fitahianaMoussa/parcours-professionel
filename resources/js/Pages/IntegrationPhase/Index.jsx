@@ -114,7 +114,7 @@ const IntegrationPhaseIndex = ({ agents, auth }) => {
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b bg-gray-50">
-                                    {['Nom', 'Prénom', 'Catégorie', 'Phase', 'Début', 'Fin', 'Actions'].map((header) => (
+                                    {['Nom', 'Prénom', 'Catégorie','Début', 'Fin', 'Actions'].map((header) => (
                                         <th key={header} className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                             {header}
                                         </th>
@@ -129,12 +129,6 @@ const IntegrationPhaseIndex = ({ agents, auth }) => {
                                             <td className="px-6 py-4 whitespace-nowrap">{agent.nom}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">{agent.prenom}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">{agent.categorie}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${phaseDetails.color}`}>
-                                                    {phaseDetails.icon}
-                                                    Phase {agent.phase_integration}
-                                                </span>
-                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {new Date(agent.date_debut).toLocaleDateString()}
                                             </td>

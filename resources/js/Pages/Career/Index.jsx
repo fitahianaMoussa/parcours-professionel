@@ -195,7 +195,7 @@ const CareerManagement = () => {
                 } whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm capitalize transition-colors`}
               >
                 {tab}
-              </button>
+              </button> 
             ))}
           </nav>
         </div>

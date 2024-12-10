@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreArreteRequest;
 use App\Http\Requests\UpdateArreteRequest;
 use App\Models\Arrete;
+use Illuminate\Http\Request;
 
 class ArreteController extends Controller
 {
@@ -51,10 +52,17 @@ class ArreteController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateArreteRequest $request, Arrete $arrete)
-    {
-        //
-    }
+    public function update(Request $request, Arrete $arrete)
+{
+    $validated = $request->validate([
+        'numero_arrete' => 'required|string',
+        'date_arrete' => 'required|date',
+    ]);
+
+    $arrete->update($validated);
+
+    return redirect()->back();
+}
 
     /**
      * Remove the specified resource from storage.

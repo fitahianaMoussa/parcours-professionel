@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Agent;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -28,3 +29,17 @@ Broadcast::channel('user.{id}', function ($user, $id) {
 Broadcast::channel('test-channel', function ($user) {
     return true; // autorise tous les utilisateurs
 });
+
+
+
+
+
+Broadcast::channel('notifications', function ($user) {
+    return auth()->check(); // Only authenticated users
+});
+
+Broadcast::channel('agent.{agentId}', function ($user, $agentId) {
+    $agent = Agent::find($agentId);
+    return $agent && ($user->id === $agent->user_id || $user->hasRole('RH'));
+});
+
