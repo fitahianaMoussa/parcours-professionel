@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use App\Models\Agent;
 use App\Service\Carrer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,34 +25,39 @@ class IntegrationPhaseController extends Controller
     /**
      * 1.3: Afficher l'interface de gestion de l'integration
      */
-    public function index()
-    {
-       
-        // 1.2: Authentification reussie est implicite car middleware auth
 
-        // 1.3: Afficher l'interface de gestion de l'integration
-        $agents = Agent::with(['contrats', 'categorie'])
-            ->whereHas('contrats', function ($query) {
-                $query->where('type', 'like', '%integration%');
-            })
-            ->get()
-            ->map(function ($agent) {
-                $progression = $this->carrerService->calculateNextProgression($agent);
-                return [
-                    'id' => $agent->id,
-                    'nom' => $agent->nom,
-                    'prenom' => $agent->prenom,
-                    'categorie' => $agent->categorie->nom,
-                    'phase_integration' => $progression['phase'] ?? null,
-                    'date_debut' => $progression['start_date'] ?? null,
-                    'date_fin' => $progression['end_date'] ?? null,
-                ];
-            });
 
-        return Inertia::render('IntegrationPhase/Index', [
-            'agents' => $agents
-        ]);
-    }
+public function index()
+{
+    // 1.2: Authentification reussie est implicite car middleware auth
+
+    // 1.3: Afficher l'interface de gestion de l'intégration
+    $agents = Agent::with(['contrats', 'categorie'])
+        ->whereHas('contrats', function ($query) {
+            // Filter contracts where the 'type_recrutement' is 'budgetaire'
+            $query->where('type_recrutement', 'budgetaire')
+                // Ensure the 'date_entree' is older than 6 years
+                ->where('date_entree', '<', Carbon::now()->subYears(6)->toDateString());
+        })
+        ->get()
+        ->map(function ($agent) {
+            $progression = $this->carrerService->calculateNextProgression($agent);
+            return [
+                'id' => $agent->id,
+                'nom' => $agent->nom,
+                'prenom' => $agent->prenom,
+                'categorie' => $agent->categorie->nom,
+                'phase_integration' => $progression['phase'] ?? null,
+                'date_debut' => $progression['start_date'] ?? null,
+                'date_fin' => $progression['end_date'] ?? null,
+            ];
+        });
+
+    return Inertia::render('IntegrationPhase/Index', [
+        'agents' => $agents
+    ]);
+}
+
 
     /**
      * 1.4.2: Afficher les details de l'integration
@@ -101,24 +107,26 @@ class IntegrationPhaseController extends Controller
      * 3.1: Verifier les periodes de stagiarisation
      */
     protected function verifierPeriodesStagiarisation(Agent $agent)
-{
-    // Récupérer les contrats de type 'stage'
-    $periodesStage = $agent->contrats()
-        ->where('type', 'stage')
-        ->orderBy('date_debut')
-        ->get();
-
-    // Calculer la durée totale en fonction des dates de début et de fin
-    $dureeTotale = $periodesStage->reduce(function ($total, $contrat) {
-        $dateFin = $contrat->date_fin ?? now();
-        return $total + $contrat->date_debut->diffInDays($dateFin);
-    }, 0);
-
-    return [
-        'periodes' => $periodesStage,
-        'duree_totale' => $dureeTotale,
-    ];
-}
+    {
+        // Récupérer les contrats de type 'stage'
+        $periodesStage = $agent->contrats()
+            ->where('type', 'stage')
+            ->orderBy('date_debut')
+            ->get();
+    
+        // Calculer la durée totale en fonction des dates de début et de fin
+        $dureeTotale = $periodesStage->reduce(function ($total, $contrat) {
+            $dateDebut = Carbon::parse($contrat->date_debut); // Convertir date_debut en instance Carbon
+            $dateFin = $contrat->date_fin ? Carbon::parse($contrat->date_fin) : Carbon::now(); // Convertir date_fin en instance Carbon, ou utiliser 'now' si null
+            
+            return $total + $dateDebut->diffInDays($dateFin); // Calcul de la différence en jours
+        }, 0);
+    
+        return [
+            'periodes' => $periodesStage,
+            'duree_totale' => $dureeTotale,
+        ];
+    }
 
 
     /**

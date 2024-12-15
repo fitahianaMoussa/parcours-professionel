@@ -116,14 +116,14 @@ const AgentInfo = ({ services, avancements: initialAvancements, agent, auth, con
           Exporter en PDF
         </button>
       </div>
-      <div ref={componentRef} className="p-8 bg-white border rounded-md">
+      <div ref={componentRef} className="p-4 bg-white border rounded-md">
         <div className="flex flex-col items-center mb-6">
-          <img src="/madagascar.jpeg" alt="Logo" className="w-60 h-60 mb-4" />
+          <img src="/madagascar.jpeg" alt="Logo" className="mb-4 w-60 h-60" />
           <h1 className="text-2xl font-bold text-center uppercase">
             Relevé de Service
           </h1>
         </div>
-        <div className="mb-8 text-center">
+        <div className="mb-4 text-center">
           <div className="flex flex-col items-center w-full max-w-3xl mx-auto gap-y-4">
             <div className="flex justify-between w-full px-4">
               <strong>NOM :</strong> <span>{agent.nom || "Non défini"}</span>
@@ -145,13 +145,13 @@ const AgentInfo = ({ services, avancements: initialAvancements, agent, auth, con
             </div>
           </div>
         </div>
-        <div className="mb-8">
+        <div className="mb-4">
           <table className="w-full border border-collapse border-gray-400">
             <thead>
               <tr className="bg-gray-200">
-                <th className="px-4 py-2 border border-gray-400">AVANCEMENTS SUCCESSIFS</th>
-                <th className="px-4 py-2 border border-gray-400">DATE D'EFFET</th>
-                <th className="px-4 py-2 border border-gray-400">N° et DATE D'ARRÊTÉ</th>
+                <th className="px-4 py-1 border border-gray-400">AVANCEMENTS SUCCESSIFS</th>
+                <th className="px-4 py-1 border border-gray-400">DATE D'EFFET</th>
+                <th className="px-4 py-1 border border-gray-400">N° et DATE D'ARRÊTÉ</th>
               </tr>
             </thead>
 
@@ -172,7 +172,7 @@ const AgentInfo = ({ services, avancements: initialAvancements, agent, auth, con
               </tr>
               {groupedAvancements[type].map((item, index) => (
                 <tr key={index} className="bg-white even:bg-gray-50">
-                  <td className="px-4 py-2 border border-gray-400">
+                  <td className="px-4 py-1 border border-gray-400">
                     {item.agent?.corps || "Non défini"}{" "}
                     {item.grade?.grade === "STAGE" 
                   ? "stagiaire" 
@@ -181,10 +181,10 @@ const AgentInfo = ({ services, avancements: initialAvancements, agent, auth, con
              : `${item.grade?.grade || "Non défini"}_${item.grade?.echelon || "Non défini"} echelon`}
 
                   </td>
-                  <td className="px-4 py-2 border border-gray-400">
+                  <td className="px-4 py-1 border border-gray-400">
                     {formatDate(item.arrete?.date_effet)}
                   </td>
-                  <td className="px-4 py-2 border border-gray-400">
+                  <td className="px-4 py-1 border border-gray-400">
                     <div className="flex flex-col space-y-2">
                       {editMode[`${item.id}-numero_arrete`] ? (
                         <input
@@ -196,7 +196,7 @@ const AgentInfo = ({ services, avancements: initialAvancements, agent, auth, con
                       ) : (
                         <div 
                           onClick={() => toggleEdit(item.id, 'numero_arrete')} 
-                          className="cursor-pointer hover:bg-gray-100 p-1 rounded"
+                          className="p-1 rounded cursor-pointer hover:bg-gray-100"
                         >
                           {item.arrete?.numero_arrete || "Non défini"}
                         </div>
@@ -212,7 +212,7 @@ const AgentInfo = ({ services, avancements: initialAvancements, agent, auth, con
                       ) : (
                         <div 
                           onClick={() => toggleEdit(item.id, 'date_arrete')} 
-                          className="cursor-pointer hover:bg-gray-100 p-1 rounded"
+                          className="p-1 rounded cursor-pointer hover:bg-gray-100"
                         >
                           du {formatDate(item.arrete?.date_arrete)}
                         </div>
@@ -221,7 +221,7 @@ const AgentInfo = ({ services, avancements: initialAvancements, agent, auth, con
                       {(editMode[`${item.id}-numero_arrete`] || editMode[`${item.id}-date_arrete`]) && (
                         <button
                           onClick={() => handleSave(item.id)}
-                          className="px-2 py-1 text-sm text-white bg-green-500 rounded hover:bg-green-600"
+                          className="px-4 py-1 text-sm text-white bg-green-500 rounded hover:bg-green-600"
                         >
                           Sauvegarder
                         </button>
@@ -239,32 +239,32 @@ const AgentInfo = ({ services, avancements: initialAvancements, agent, auth, con
 
           </table>
         </div>
-        <div className="mb-8">
+        <div className="mb-4">
           <h2 className="mb-4 text-lg font-semibold text-center">SERVICE EFFECTUÉS</h2>
           <table className="w-full border border-collapse border-gray-400">
             <thead>
               <tr className="bg-gray-200">
-                <th className="px-4 py-2 border border-gray-400">PÉRIODE</th>
-                <th className="px-4 py-2 border border-gray-400">POSTE OCCUPÉ</th>
-                <th className="px-4 py-2 border border-gray-400">ACTE DE NOMINATION</th>
-                <th className="px-4 py-2 border border-gray-400">LIEU</th>
+                <th className="px-4 py-1 border border-gray-400">PÉRIODE</th>
+                <th className="px-4 py-1 border border-gray-400">POSTE OCCUPÉ</th>
+                <th className="px-4 py-1 border border-gray-400">ACTE DE NOMINATION</th>
+                <th className="px-4 py-1 border border-gray-400">LIEU</th>
               </tr>
             </thead>
             <tbody>
               {services.map((item, index) => (
                 <tr key={index} className="bg-white even:bg-gray-50">
-                  <td className="px-4 py-2 border border-gray-400">
+                  <td className="px-4 py-1 border border-gray-400">
                     {formatDate(item.date_debut)} au {formatDate(item.date_fin)}
                   </td>
-                  <td className="px-4 py-2 border border-gray-400">{item.poste_occupe || "Non défini"}</td>
-                  <td className="px-4 py-2 border border-gray-400">
+                  <td className="px-4 py-1 border border-gray-400">{item.poste_occupe || "Non défini"}</td>
+                  <td className="px-4 py-1 border border-gray-400">
                     <div className="flex flex-col">
                       <div>{item.reference?.type || "Non défini"}</div>
                       <div>{item.reference?.numero || "Non défini"}</div>
                       <div>du {formatDate(item.reference?.date_reference)}</div>
                     </div>
                   </td>
-                  <td className="px-4 py-2 border border-gray-400">{item.lieu || "Non défini"}</td>
+                  <td className="px-4 py-1 border border-gray-400">{item.lieu || "Non défini"}</td>
                 </tr>
               ))}
             </tbody>
