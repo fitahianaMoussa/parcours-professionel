@@ -59,9 +59,7 @@ class EmployeController extends Controller
     public function Contrats()
     {
         $id = Auth::id();
-           //dd($id);
         $agent = Agent::where('user_id', $id)->first();
-           //dd($agent);
         $contrats = Contrat::with('arrete','agent')->where('agent_id',$agent->id)->get();
         return Inertia::render('Employe/Contrat',['contrats' => $contrats]);
     }

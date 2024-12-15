@@ -9,6 +9,7 @@ use App\Models\Agent;
 use App\Models\Categorie;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;  // Import the Str facade for random string generation
@@ -37,98 +38,95 @@ class AgentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        // Validate incoming request data
-        $validatedData = $request->validate([
-            'matricule' => [
-                'required',
-                'string',
-                'max:50',
-                'unique:agents,matricule'
-            ],
-            'nom' => [
-                'required',
-                'string',
-                'max:100'
-            ],
-            'prenom' => [
-                'required',
-                'string',
-                'max:100'
-            ],
-            'date_de_naissance' => [
-                'nullable',
-                'date',
-                'before:today'
-            ],
-            'date_entree' => [
-                'required',
-                'date',
-                'after:date_de_naissance'
-            ],
-            'categorie_id' => [
-                'nullable',
-                'exists:categories,id'
-            ],
-            'type_recrutement' => [
-                'nullable',
-                'in:Diplôme,Poste budgétaire libre'
-            ],
-            'diplome' => [
-                'nullable',
-                'string',
-                'max:255'
-            ],
-            'corps' => [
-                'nullable',
-                'string',
-                'max:100'
-            ],
-            'chapitre_budgetaire' => [
-                'nullable',
-                'string',
-                'max:100'
-            ],
-            'is_active' => [
-                'boolean'
-            ]
-        ], [
-            'matricule.unique' => 'Ce matricule existe déjà.',
-            'date_entree.after' => 'La date d\'entrée doit être postérieure à la date de naissance.',
-            'date_de_naissance.before' => 'La date de naissance doit être une date passée.'
-        ]);
+  
 
-        // Generate a random password for the user
-        $password = Str::random(8);  // Adjust the length of the password as needed
-
-        try {
-            // Create the user and hash the password
-            $user = User::create([
-                'name' => $validatedData['nom'] . ' ' . $validatedData['prenom'], 
-                'email' => $validatedData['nom'] . '@regionhautematsiatra.com', 
-                'password' => Hash::make($password),  
-                'role' => 'agent', 
-            ]);
-
-            // Now, create the agent and associate it with the user
-            $agent = Agent::create(array_merge($validatedData, [
-                'user_id' => $user->id,  // Associate the agent with the user
-            ]));
-
-            // Optionally, you can send the password to the user via email or display it
-            // Example: Send an email with the password to the user
-           // Mail::to($user->email)->send(new AgentPasswordMail($user->name, $password));
-            return redirect()
-                ->route('agent.index')
-                ->with('success', 'Agent créé avec succès. Mot de passe : ' . $password);
-        } catch (\Exception $e) {
-            return back()
-                ->withErrors(['error' => 'Une erreur s\'est produite lors de la création de l\'agent : ' . $e->getMessage()])
-                ->withInput();
-        }
-    }
-
+     public function store(Request $request)
+     {
+         // Valider les données entrantes
+         $validatedData = $request->validate([
+             'nom' => 'required|string|max:50',
+             'prenom' => 'required|string|max:50',
+             'date_de_naissance' => 'nullable|date|before:today',
+             'categorie_id' => 'nullable|exists:categories,id',
+             'type_recrutement' => 'nullable|in:diplome,budgetaire',
+             'diplome' => 'nullable|string|max:255',
+             'corps' => 'nullable|string|max:50',
+             'chapitre_budgetaire' => 'nullable|string|max:50',
+             'is_active' => 'nullable|boolean',
+         ]);
+     
+         // Générer un matricule unique
+         $matricule = 'EMP' . strtoupper(Str::random(6));
+     
+         // Générer une date d'entrée aléatoire
+         $dateEntree = now()->subYears(rand(0, 30))->format('Y-m-d');
+     
+         // Générer un mot de passe sécurisé aléatoire
+         $password = 'password';
+     
+         // Générer un email unique
+         $email = strtolower($validatedData['prenom'] . '.' . $validatedData['nom']) . '@example.com';
+         $email = $this->generateUniqueEmail($email);
+     
+         DB::beginTransaction();
+         try {
+             // Créer l'agent
+             $agent = Agent::create([
+                 'nom' => $validatedData['nom'],
+                 'prenom' => $validatedData['prenom'],
+                 'date_entree' => $dateEntree,
+                 'categorie_id' => $validatedData['categorie_id'],
+                 'type_recrutement' => $validatedData['type_recrutement'] ?? collect(['diplome', 'budgetaire'])->random(),
+                 'diplome' => $validatedData['diplome'] ?? collect(['Master', 'Licence', 'BTS'])->random(),
+                 'corps' => $validatedData['corps'] ?? collect(['Ingenieur', 'Technicien', 'Analyste'])->random(),
+                 'chapitre_budgetaire' => $validatedData['chapitre_budgetaire'] ?? 'A' . rand(100, 999),
+                 'is_active' => $validatedData['is_active'] ?? true,
+                 'date_de_naissance' => $validatedData['date_de_naissance'] ?? now()->subYears(rand(30, 50))->format('Y-m-d'),
+                 'matricule' => $matricule,
+             ]);
+     
+             // Créer l'utilisateur et l'associer à l'agent
+             $user = User::create([
+                 'name' => $validatedData['prenom'] . ' ' . $validatedData['nom'],
+                 'email' => $email,
+                 'password' => bcrypt($password),
+                 'role' => 'agent',
+                 'agent_id' => $agent->id, // Association agent -> user
+             ]);
+     
+             // Mise à jour de l'agent avec l'ID de l'utilisateur
+             $agent->user_id = $user->id;
+             $agent->save();
+     
+             DB::commit();
+     
+             return redirect()->route('agent.index')->with('success', 'Agent créé avec succès.');
+     
+         } catch (\Exception $e) {
+             DB::rollBack();
+             return back()->withErrors(['error' => 'Erreur lors de la création de l\'agent : ' . $e->getMessage()]);
+         }
+     }
+     
+     /**
+      * Générer un email unique pour l'utilisateur.
+      *
+      * @param string $email
+      * @return string
+      */
+     private function generateUniqueEmail(string $email)
+     {
+         $originalEmail = $email;
+         $counter = 1;
+     
+         while (User::where('email', $email)->exists()) {
+             $email = Str::before($originalEmail, '@') . $counter . '@' . Str::after($originalEmail, '@');
+             $counter++;
+         }
+     
+         return $email;
+     }
+     
     /**
      * Display the specified resource.
      */

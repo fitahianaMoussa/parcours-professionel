@@ -230,8 +230,8 @@ const AgentForm = ({ auth, errors, categories }) => {
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="">Sélectionner le type</option>
-                                <option value="Diplôme">Diplôme</option>
-                                <option value="Poste budgétaire libre">Poste budgétaire libre</option>
+                                <option value="diplome">Diplôme</option>
+                                <option value="budgetaire">Poste budgétaire libre</option>
                             </select>
                             {errors.type_recrutement && (
                                 <p className="mt-1 text-xs text-red-500">{errors.type_recrutement}</p>
