@@ -164,5 +164,6 @@ Route::middleware(['auth','role:agent'])->group(function () {
     Route::get('/employecontrats',[EmployeController::class,'Contrats'])->name('employe.contrats');
     Route::get('/employeavancements',[EmployeController::class,'Avancements'])->name('employe.avancements');
     Route::get('/employeavancements/{avancement}', [EmployeController::class, 'showAvancement']) ->name('advancementsEmploye.show');
+    Route::get('/serviceRendu', [EmployeController::class, 'index']) ->name('Employe.index');
 });
 require __DIR__ . '/auth.php';

@@ -26,7 +26,7 @@ export default function Authenticated({ user, children }) {
             name: "Tableau de Board",
             href: "/dashboard",
             icon: FiGrid,
-            roles: ["admin", "RH", "agent"],
+            roles: ["admin", "RH"],
         },
         { name: "Agent", href: "/agent", icon: FiUsers, roles: ["RH"] },
         { name: "Contrat", href: "/contrat", icon: FiFileText, roles: ["RH"] },
@@ -62,7 +62,7 @@ export default function Authenticated({ user, children }) {
         },
         {
             name: "Parcours",
-            href: "/employeparcours",
+            href: "/parcours",
             icon: FiFileText,
             roles: ["agent"],
         },
@@ -78,6 +78,14 @@ export default function Authenticated({ user, children }) {
             icon: FiTrendingUp,
             roles: ["agent"],
         },
+        {
+            name: "Service Rendu",
+            href: "/serviceRendu",
+            icon: FiTrendingUp,
+            roles: ["agent"],
+        },
+        
+       
     ];
 
     const filteredNavigationItems = navigationItems.filter((item) =>
@@ -103,7 +111,7 @@ export default function Authenticated({ user, children }) {
                             <img
                                 src="/haute matsiatra.jpeg"
                                 alt="Logo"
-                                className="w-8 h-8 object-contain"
+                                className="object-contain w-8 h-8"
                             />
                             <span className="ml-2 text-xl font-semibold text-white">
                                 Gestion de parcours

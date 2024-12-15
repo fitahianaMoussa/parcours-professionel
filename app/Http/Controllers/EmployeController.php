@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Agent;
 use App\Models\Avancement;
 use App\Models\Contrat;
+use App\Models\ServiceRendu;
 use App\Service\ArreteCarrerService;
 use App\Service\AvancementCarrerService;
 use App\Service\Carrer;
@@ -46,11 +47,21 @@ class EmployeController extends Controller
             'careerPaths' => $careerPaths
         ]);
     }
-
+    public function index()
+    {
+        $id = Auth::id();
+        //dd($id);
+        $agent = Agent::where('user_id', $id)->first();
+        $services = ServiceRendu::with('reference','agent')->where('agent_id',$agent->id)->get();
+       // dd($services);
+        return Inertia::render('Employe/IndexServiceRendu',['services' => $services]);
+    }
     public function Contrats()
     {
         $id = Auth::id();
+           //dd($id);
         $agent = Agent::where('user_id', $id)->first();
+           //dd($agent);
         $contrats = Contrat::with('arrete','agent')->where('agent_id',$agent->id)->get();
         return Inertia::render('Employe/Contrat',['contrats' => $contrats]);
     }
@@ -58,7 +69,9 @@ class EmployeController extends Controller
     public function Avancements()
     {
         $id = Auth::id();
+           //dd($id);
         $agent = Agent::where('user_id', $id)->first();
+           //dd($agent);
         $avancements = Avancement::with('arrete','agent','grade')->where('agent_id',$agent->id)->get();
         return Inertia::render('Employe/Avancement',['avancements' => $avancements]);
     }
@@ -70,4 +83,6 @@ class EmployeController extends Controller
             'advancement' => $avancement
         ]);
     }
+
+    
 }
